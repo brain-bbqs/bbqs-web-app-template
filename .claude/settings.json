@@ -1,5 +1,5 @@
 {
   "permissions": {
-    "deny": ["AskUserQuestion", "mcp__github__issue_write"]
+    "deny": ["mcp__github__issue_write"]
   }
 }
