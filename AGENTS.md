@@ -50,8 +50,7 @@ Name the rule, and give just enough of the failure to show why the rule exists.
   The prose above it stays a description of the change, not of the conversation.
 - Limit use of em-dashes in all text.
   Before committing any change to `CHANGELOG.md`, grep the newly added entries for `—` and rewrite any hits (commas, parentheses, or separate sentences work well).
-- When a request is genuinely ambiguous, ask in plain text at the end of your reply and stop there.
-  Do not use interactive prompts (`.claude/settings.json` denies them).
+- When a request is genuinely ambiguous, ask at the end of your reply and stop there.
   Waiting for an answer is fine, there is no time pressure to guess.
   Bundle related questions into one message rather than asking them one at a time.
 - Before storing any new credential/token client-side, adding/changing `innerHTML`/`outerHTML`/`insertAdjacentHTML` usage, adding a runtime dependency, or responding to a CodeQL "clear text storage of sensitive data" alert, read `SECURITY.md` (the `frontend-security` skill is its triggerable summary).
