@@ -1,12 +1,17 @@
 // @vitest-environment jsdom
+import { throwingStorage } from "@brain-bbqs/test-utils/vitest";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { loadStoredTheme, saveStoredTheme, THEME_KEY } from "../../src/lib/settings";
+
+let restoreStorage: (() => void) | undefined;
 
 beforeEach(() => {
   localStorage.clear();
 });
 
 afterEach(() => {
+  restoreStorage?.();
+  restoreStorage = undefined;
   vi.restoreAllMocks();
 });
 
@@ -29,18 +34,15 @@ describe("stored theme", () => {
   });
 
   it("reads as unset when storage is unavailable", () => {
-    vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
-      throw new Error("blocked");
-    });
+    restoreStorage = throwingStorage();
     expect(loadStoredTheme()).toBe(null);
   });
 
   it("warns rather than throws when storage refuses the write", () => {
-    vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
-      throw new Error("quota");
-    });
+    restoreStorage = throwingStorage();
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     expect(() => saveStoredTheme("dark")).not.toThrow();
     expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn).toHaveBeenCalledWith("Could not save theme preference:", expect.any(Error));
   });
 });

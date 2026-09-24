@@ -84,6 +84,18 @@ describe("main.ts boot", () => {
     await vi.waitFor(() => expect(window.location.hash).toBe(""));
   });
 
+  it("leaves the modal closed when the fragment changes to anything else", () => {
+    const modal = el<HTMLDialogElement>("whats-new-modal");
+    expect(modal.open).toBe(false);
+    window.history.replaceState(null, "", "#elsewhere");
+    // Dispatched here rather than awaited: jsdom queues its own hashchange, and whether that lands
+    // before the test ends would decide whether this path runs at all.
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+    expect(modal.open).toBe(false);
+    expect(window.location.hash).toBe("#elsewhere");
+    window.history.replaceState(null, "", window.location.pathname);
+  });
+
   it("closes the modal on a backdrop click", () => {
     const modal = el<HTMLDialogElement>("whats-new-modal");
     el("whats-new-button").click();

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.3
+
+#### 🏠 Internal
+
+- Moved the size formatter, safe storage and shared test helpers onto the `@brain-bbqs/utils` and `@brain-bbqs/test-utils` packages ([#N](https://github.com/brain-bbqs/web-app-template/pull/N))
+
 ## 0.1.2
 
 #### 🏠 Internal

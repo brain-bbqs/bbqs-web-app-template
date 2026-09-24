@@ -2,12 +2,11 @@
 // Each test file gets its own module registry, so importing main.ts runs its top-level wiring
 // exactly once per file; boot with the URL search params the scenario needs before that first
 // import (one file per boot scenario, e.g. main.smoke.test.ts and main.mock-file.test.ts).
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { readIndexHtml } from "@brain-bbqs/test-utils/vitest";
 
 export function bodyFromIndexHtml(): string {
   // import.meta.url is an http URL under jsdom; vitest's cwd is the repo root (see its config).
-  const html = readFileSync(resolve(process.cwd(), "index.html"), "utf-8");
+  const html = readIndexHtml();
   // The module entry (and the pre-paint script, in a built page) don't belong in this harness:
   // main.ts is imported directly instead. Parsed and pruned via the DOM (DOMParser never
   // executes scripts) rather than regex-filtering the HTML.

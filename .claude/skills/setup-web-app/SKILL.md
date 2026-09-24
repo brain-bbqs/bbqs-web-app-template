@@ -39,7 +39,7 @@ That is the whole point of it being shared.
 ## 0. Check the shared components first
 
 Before writing anything in steps 2 and 3, check [`brain-bbqs/bbqs-web-components`](https://github.com/brain-bbqs/bbqs-web-components) for a package that already does it, and repeat the check for every component you are about to add.
-It publishes the code the sibling apps have in common as `@brain-bbqs/*` npm packages: `config` (tooling, already used by `configs/`), `utils` (formatting, queues, path sanitization, safe storage), `ui` (theme toggle, account menu, footer, dropzone, human-subjects banner, DOM helpers, shared CSS), `ember-client` (EMBER sign-in, API calls, the dataset picker) and `test-utils` (Playwright and Vitest helpers).
+It publishes the code the sibling apps have in common as `@brain-bbqs/*` npm packages: `config` (tooling, already used by `configs/`), `utils` (formatting, queues, path sanitization, safe storage; already used for the size formatter and the theme setting's storage), `ui` (theme toggle, account menu, footer, dropzone, human-subjects banner, DOM helpers, shared CSS), `ember-client` (EMBER sign-in, API calls, the dataset picker) and `test-utils` (Playwright and Vitest helpers, already used by `tests/`).
 Each package's README says what it exports.
 
 - A package that provides it: `npm install` it and pass this app's identity (storage keys, client id, wording) as options.
@@ -88,7 +88,7 @@ Then, for the app itself:
 - A unit test per `src/lib/` module; jsdom tests for `src/ui/` modules against hand-built elements (see `tests/unit/dropzone.test.ts`).
 - One `tests/unit/main.<scenario>.test.ts` per boot scenario, through `tests/unit/helpers/mainHarness.ts`; the plain boot and each `?test` injection worth its own file.
 - `tests/integration/smoke.spec.ts` covers the shell; add a spec per feature, driving the page the way a person would, with `?test` injections rather than `page.route` stubbing wherever they reach the same state.
-- `tests/chromatic/app.chromatic.test.ts` snapshots each page state at every viewport in `VIEWPORTS` and fails on sideways overflow; add a test per new state, named with the viewport in the title.
+- `tests/chromatic/app.chromatic.test.ts` snapshots each page state at every viewport in `VIEWPORTS` and fails on sideways overflow, through `forEachViewport` and `expectNoHorizontalOverflow` from `@brain-bbqs/test-utils/playwright`; add a `forEachViewport` call per new state.
 - A story per component state, in both themes (see `stories/Dropzone.stories.ts`), and keep `stories/App.stories.ts` rendering the real `index.html` with each loaded state applied by hand.
 - Ratchet the coverage thresholds in `configs/vitest.config.ts` to just below what `npm run test:coverage` measures once the app's tests are in.
 - Rewrite `docs/user_tests/template.md`'s app section for what a person would do with this app, and keep the cross-cutting section.

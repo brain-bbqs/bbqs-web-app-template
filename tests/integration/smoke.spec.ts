@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
+import { seedTheme } from "@brain-bbqs/test-utils/playwright";
+import { THEME_KEY } from "../../src/lib/settings";
 import { dropFile } from "./helpers/drop";
-import { seedTheme } from "./helpers/theme";
 
 test.describe("Web App Template shell", () => {
   test("renders branding, version, and the picker", async ({ page }) => {
@@ -60,7 +61,7 @@ test.describe("Web App Template shell", () => {
   });
 
   test("applies a stored theme before first paint", async ({ page }) => {
-    await seedTheme(page, "dark");
+    await seedTheme(page, "dark", { storageKey: THEME_KEY });
     await page.goto("/");
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   });

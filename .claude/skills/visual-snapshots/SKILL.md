@@ -6,14 +6,14 @@ description: How the Chromatic snapshots (Storybook and Playwright) stay determi
 # Visual snapshots and live test injections
 
 Lessons earned across the sibling apps (bbqs-uploader, encoding-helper and clip-extractor) while chasing Chromatic diffs that no code change explained.
-**They are already implemented** in `tests/chromatic/`, `tests/integration/helpers/layout.ts`, `@brain-bbqs/config` (`resolveAppVersion`, `createPlaywrightConfig`), `src/lib/testInjection.ts` and the two Chromatic workflows; the rest of this skill explains what those pieces are doing on your behalf, so that you can tell when you are about to step outside them.
+**They are already implemented** in `tests/chromatic/`, `@brain-bbqs/test-utils/playwright` (`VIEWPORTS`, `forEachViewport`, `expectNoHorizontalOverflow`), `@brain-bbqs/config` (`resolveAppVersion`, `createPlaywrightConfig`), `src/lib/testInjection.ts` and the two Chromatic workflows; the rest of this skill explains what those pieces are doing on your behalf, so that you can tell when you are about to step outside them.
 
 ## One test per viewport, with the viewport in the title
 
 Chromatic keys a Playwright archive by the test's title alone.
 Run the same test under several Playwright projects and each viewport writes over the last one's manifest, so only the project that ran last reaches Chromatic at all.
-So `createPlaywrightConfig` in `@brain-bbqs/config` gives both Playwright configs one Desktop Chrome project, and `tests/chromatic/app.chromatic.test.ts` loops over `VIEWPORTS` from `helpers/layout.ts`, setting the viewport inside each test and naming it in the title (`Main page - default [mobile portrait]`).
-Add a new page state as another test inside that loop, never as a new project.
+So `createPlaywrightConfig` in `@brain-bbqs/config` gives both Playwright configs one Desktop Chrome project, and `tests/chromatic/app.chromatic.test.ts` registers each state through `forEachViewport` from `@brain-bbqs/test-utils/playwright`, which sets each of its `VIEWPORTS` inside the test and names it in the title (`Main page - default [mobile portrait]`).
+Add a new page state as another `forEachViewport` call, never as a new project.
 
 ## Fail on sideways overflow by name, not by pixel
 
