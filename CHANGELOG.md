@@ -4,7 +4,7 @@
 
 #### 🏠 Internal
 
-- Updated the shared `@brain-bbqs/config` package to 0.2.0 ([#PR](https://github.com/brain-bbqs/web-app-template/pull/PR))
+- Updated the shared `@brain-bbqs/config` package to 0.2.0 ([#4](https://github.com/brain-bbqs/web-app-template/pull/4))
 
 ## 0.1.1
 
