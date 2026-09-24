@@ -1,4 +1,4 @@
-// Also read by the inline pre-paint script in index.html; keep the two literals in sync.
+// Also read before first paint by the script configs/vite.config.ts injects into index.html.
 export const THEME_KEY = "web-app-template.theme";
 
 export type ThemePreference = "light" | "dark";

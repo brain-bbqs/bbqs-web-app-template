@@ -29,12 +29,24 @@ They are the shell, shared with every sibling app, and a divergent copy here is 
 
 - the header, the theme toggle and its pre-paint script, the BBQS watermark, the footer bar, the What's New modal and the version stamp;
 - the theme tokens (add tokens if the app needs more colors, keep both dark blocks identical, never hardcode a hex in a component);
-- anything under `configs/` beyond adding a runtime dependency's alias or chunking rule where the build genuinely needs it;
+- anything under `configs/` beyond passing the shared `@brain-bbqs/config` factories an app-specific option, such as a runtime dependency's alias or chunking rule where the build genuinely needs it (a default that is wrong for every app is fixed in that package instead);
 - the workflows, beyond the one hostname in `preview.yml` (step 1) and the template guards (step 6);
 - the `?test` injection scheme, the `getElements()` id-lookup pattern, the changelog format.
 
 If something in the shell is wrong for this app, it is probably wrong for its siblings too: fix it in [`brain-bbqs/web-app-template`](https://github.com/brain-bbqs/web-app-template) so the next app gets the fix, and port the same change here.
 That is the whole point of it being shared.
+
+## 0. Check the shared components first
+
+Before writing anything in steps 2 and 3, check [`brain-bbqs/bbqs-web-components`](https://github.com/brain-bbqs/bbqs-web-components) for a package that already does it, and repeat the check for every component you are about to add.
+It publishes the code the sibling apps have in common as `@brain-bbqs/*` npm packages: `config` (tooling, already used by `configs/`), `utils` (formatting, queues, path sanitization, safe storage), `ui` (theme toggle, account menu, footer, dropzone, human-subjects banner, DOM helpers, shared CSS), `ember-client` (EMBER sign-in, API calls, the dataset picker) and `test-utils` (Playwright and Vitest helpers).
+Each package's README says what it exports.
+
+- A package that provides it: `npm install` it and pass this app's identity (storage keys, client id, wording) as options.
+- A package that almost fits: extend it in that repository with a changeset, rather than writing a local variant here.
+- Only a sibling app has it: copy the sibling's version, and note in the setup PR that a second app now carries it, which makes it a candidate for a package.
+
+The **What belongs in an app repository** and **Check the shared components first** sections of `AGENTS.md` say the same for the app's later life.
 
 ## 1. Name the app
 
@@ -44,7 +56,7 @@ Find every occurrence first; the list below is what the template ships with, and
 grep -rn --exclude-dir=node_modules --exclude-dir=dist --exclude=package-lock.json -e "web-app-template" -e "Web App Template" .
 ```
 
-- `web-app-template` → the repository name, in: `package.json` (`name`), `index.html` (the `localStorage` key in the pre-paint script, the footer's issue links and version link), `src/lib/settings.ts` (`THEME_KEY`, kept in sync with that script), `public/CNAME` and `.github/workflows/preview.yml` (`pages-base-url`, both `<app-name>.brain-bbqs.org`), `README.md` (badges), `AGENTS.md` (the changelog PR-link format), `docs/README.md` (the live links), `CHANGELOG.md`, `tests/unit/changelog.test.ts` and `tests/integration/smoke.spec.ts`.
+- `web-app-template` → the repository name, in: `package.json` (`name`), `index.html` (the footer's issue links and version link), `src/lib/settings.ts` (`THEME_KEY`, which `configs/vite.config.ts` also hands to the pre-paint script), `public/CNAME` and `.github/workflows/preview.yml` (`pages-base-url`, both `<app-name>.brain-bbqs.org`), `README.md` (badges), `AGENTS.md` (the changelog PR-link format), `docs/README.md` (the live links), `CHANGELOG.md`, `tests/unit/changelog.test.ts` and `tests/integration/smoke.spec.ts`.
   Then `npm install` so `package-lock.json` follows.
 - `Web App Template` → the display title, in: `index.html` (`<title>`, `<h1>`, the header logo's `alt`), `README.md`, both files under `.github/ISSUE_TEMPLATE/`, `src/assets/app-logo.svg` and `tests/integration/smoke.spec.ts`.
 - The subtitle under the header in `index.html`, and the one-line description at the top of `README.md` and in `package.json`: what the app does, from the reader's side, in one sentence.
@@ -69,7 +81,7 @@ Then, for the app itself:
 - **Give every state worth a screenshot a `?test` injection**: extend `TestInjection` in `src/lib/testInjection.ts`, substitute the fake in `src/main.ts` at the one point the real code path would read a file or make a call, and add a row to `docs/README.md`.
   Read the `visual-snapshots` skill before writing one; it says what makes a fake honest.
 - **Add runtime dependencies to `package.json` `dependencies`** only with a reason, and lazy-load anything heavy (ffmpeg.wasm, a video parser) so the first paint stays fast; encoding-helper's `configs/vite.config.ts` shows the chunking rule for that.
-- Do not add a "Clear cache" footer control, sign-in, or an educational toggle unless the app needs one; when it does, copy the sibling that has it (bbqs-uploader, clip-extractor and encoding-helper respectively) rather than designing a new one.
+- Do not add a "Clear cache" footer control, sign-in, or an educational toggle unless the app needs one; when it does, use the `@brain-bbqs/*` package that provides it (sign-in is `@brain-bbqs/ember-client` plus the `ui` account menu), or copy the sibling that has it (bbqs-uploader, clip-extractor and encoding-helper respectively) rather than designing a new one.
 
 ## 3. Tests and stories
 
