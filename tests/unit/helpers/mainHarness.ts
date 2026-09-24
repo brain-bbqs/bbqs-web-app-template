@@ -2,18 +2,7 @@
 // Each test file gets its own module registry, so importing main.ts runs its top-level wiring
 // exactly once per file; boot with the URL search params the scenario needs before that first
 // import (one file per boot scenario, e.g. main.smoke.test.ts and main.mock-file.test.ts).
-import { readIndexHtml } from "@brain-bbqs/test-utils/vitest";
-
-export function bodyFromIndexHtml(): string {
-  // import.meta.url is an http URL under jsdom; vitest's cwd is the repo root (see its config).
-  const html = readIndexHtml();
-  // The module entry (and the pre-paint script, in a built page) don't belong in this harness:
-  // main.ts is imported directly instead. Parsed and pruned via the DOM (DOMParser never
-  // executes scripts) rather than regex-filtering the HTML.
-  const doc = new DOMParser().parseFromString(html, "text/html");
-  for (const script of Array.from(doc.querySelectorAll("script"))) script.remove();
-  return doc.body.innerHTML;
-}
+import { bodyOf, readIndexHtml } from "@brain-bbqs/test-utils/vitest";
 
 export function el<T extends HTMLElement>(id: string): T {
   const found = document.getElementById(id);
@@ -80,12 +69,12 @@ export function installDialogPolyfill(): void {
 
 /**
  * Boots the real app: sets the URL (so main.ts's `?test&...` injection reader sees `search`),
- * swaps in the real index.html body, installs the matchMedia stub and dialog polyfill, and
- * imports src/main.ts. Call once per test file, from `beforeAll`.
+ * swaps in the real index.html body without its scripts (main.ts is imported directly instead),
+ * installs the matchMedia stub and dialog polyfill, and imports src/main.ts. Call once per test file, from `beforeAll`.
  */
 export async function bootMain(search = ""): Promise<void> {
   window.history.replaceState(null, "", `/${search}`);
-  document.body.innerHTML = bodyFromIndexHtml();
+  document.body.innerHTML = bodyOf(readIndexHtml(), { stripScripts: true });
   installMatchMedia();
   installDialogPolyfill();
   await import("../../../src/main");
