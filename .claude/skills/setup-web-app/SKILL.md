@@ -130,7 +130,7 @@ These pieces document the template itself, not the generated app; delete them in
 - The README **Repository setup** section (including its **With Claude Code** subsection) and the **Note** block above **How it works**.
 - `.claude/skills/setup-web-app/`: this skill has no purpose once setup is done.
   Keep `frontend-security`, `reuse-license-setup` and `visual-snapshots`; they are about the app, not the template.
-- The `if: github.repository != 'brain-bbqs/web-app-template'` conditions in `.github/workflows/` (`deploy.yml`, `preview.yml`, both Chromatic workflows, and the Codecov step in `lint.yml`).
+- The `if: github.repository != 'brain-bbqs/bbqs-web-app-template'` conditions in `.github/workflows/` (`deploy.yml`, `preview.yml`, both Chromatic workflows, and the Codecov step in `lint.yml`).
   They exist so the template does not deploy a placeholder page or fail on secrets it does not have; this repository is not the template, so each condition is already true and every trigger runs.
   Deleting them is tidiness rather than a fix, and leaving them costs this app nothing.
 - `CHANGELOG.md`: replace its contents with a single `## 0.1.0` heading and one `#### 🏠 Internal` entry describing this setup PR, so the What's New modal opens on the app's own history.

@@ -44,7 +44,7 @@ jobs:
       # upload would fail every dependency-bump PR; skip it for that actor instead of failing lint.
       # Skipped in the template itself too, which has no Codecov project behind it.
       - name: Upload coverage to Codecov
-        if: ${{ github.actor != 'dependabot[bot]' && github.repository != 'brain-bbqs/web-app-template' }}
+        if: ${{ github.actor != 'dependabot[bot]' && github.repository != 'brain-bbqs/bbqs-web-app-template' }}
         uses: codecov/codecov-action@v7
         with:
           files: ./coverage/lcov.info

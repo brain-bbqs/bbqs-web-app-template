@@ -13,7 +13,7 @@ concurrency: preview-${{ github.ref }}
 jobs:
   deploy-preview:
     # Never in the template itself (see deploy.yml); true, and so run, in every generated app.
-    if: github.repository != 'brain-bbqs/web-app-template'
+    if: github.repository != 'brain-bbqs/bbqs-web-app-template'
     runs-on: ubuntu-latest
     permissions:
       contents: write
