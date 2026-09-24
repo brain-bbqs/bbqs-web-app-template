@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2
+
+#### 🏠 Internal
+
+- Updated the shared `@brain-bbqs/config` package to 0.2.0 ([#PR](https://github.com/brain-bbqs/web-app-template/pull/PR))
+
 ## 0.1.1
 
 #### 🏠 Internal
