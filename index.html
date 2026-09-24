@@ -5,14 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Web App Template</title>
     <link rel="icon" type="image/svg+xml" href="/src/assets/app-logo.svg" />
-    <script>
-      // Applies the stored theme override before first paint so a saved dark/light choice doesn't
-      // flash the OS-preferred theme first. Key kept in sync with THEME_KEY in src/lib/settings.ts.
-      try {
-        var storedTheme = localStorage.getItem("web-app-template.theme");
-        if (storedTheme === "light" || storedTheme === "dark") document.documentElement.dataset.theme = storedTheme;
-      } catch (e) {}
-    </script>
   </head>
   <body>
     <a

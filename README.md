@@ -40,7 +40,7 @@ So a repository generated from it holds only what makes the app different from i
 | `tests/integration/`    | Playwright, against the built app. `helpers/layout.ts` names every element that runs off the side of a narrow viewport.                                                                                |
 | `tests/chromatic/`      | The Chromatic snapshots: each page state at desktop, tablet and phone sizes, in both orientations.                                                                                                     |
 | `stories/`              | Storybook. `App.stories.ts` renders `index.html` itself (imported raw, so it cannot drift); component stories render each state in both themes.                                                        |
-| `configs/`              | Every tool's configuration, out of the repository root: Vite, Vitest, Playwright (one shared config), Storybook, ESLint, Prettier, TypeScript, codespell.                                              |
+| `configs/`              | Every tool's configuration, out of the repository root, each a thin call into the shared `@brain-bbqs/config` package: Vite, Vitest, Playwright, Storybook, ESLint, Prettier, TypeScript; codespell.   |
 | `.github/workflows/`    | Lint (typecheck, lint, unit tests with coverage to Codecov), Test (Playwright), Version Check (a `package.json` bump per PR), Deploy (to `gh-pages`), PR preview, and the two Chromatic runs.          |
 | `CHANGELOG.md`          | One entry per PR, in the reader's words. It is what the What's New modal shows, so it is the app's release notes.                                                                                      |
 | `docs/`                 | `README.md` lists the `?test&...` live test injections; `user_tests/` holds the manual checklist and one filled copy per tester.                                                                       |
@@ -48,7 +48,7 @@ So a repository generated from it holds only what makes the app different from i
 
 Three conventions do most of the work of keeping the apps alike:
 
-- **The version stamp.** `package.json`'s version is injected at build time as `__APP_VERSION__` (see `configs/appVersion.ts`), shown in the footer, and bumped on every PR that touches the app (the Version Check workflow enforces it). Chromatic pins it to `0.0.0` so a bump alone never re-snapshots a page.
+- **The version stamp.** `package.json`'s version is injected at build time as `__APP_VERSION__` (by `@brain-bbqs/config`'s `resolveAppVersion`), shown in the footer, and bumped on every PR that touches the app (the Version Check workflow enforces it). Chromatic pins it to `0.0.0` so a bump alone never re-snapshots a page.
 - **The changelog feeds the page.** `CHANGELOG.md` is imported raw and rendered into the What's New modal (`src/lib/changelog.ts`), also reachable at `#changelog`, so a change is described once, for the person using the app.
 - **`?test` injections.** A URL like `?test&mock_file` drives the deployed page into a real UI state with no local file, no sign-in and no network, so a person can eyeball each state live and the Chromatic snapshots can capture it deterministically. `?test` alone is a no-op.
 
@@ -70,6 +70,7 @@ Set `PLAYWRIGHT_CHROMIUM_PATH` to reuse a browser already on the machine instead
 After generating a repository from this template, the full setup checklist lives in [`.claude/skills/setup-web-app/SKILL.md`](.claude/skills/setup-web-app/SKILL.md): naming the app, deciding what it loads and shows, implementing that under `src/lib/` and `src/ui/`, connecting the repository's own services (Pages, Codecov, Chromatic), and removing the template scaffolding (this section and the **How it works** section above included).
 
 Setting up an app is naming it and writing what it does with what it loads.
+Before writing any component for it, check the shared [`@brain-bbqs/*` packages](https://github.com/brain-bbqs/bbqs-web-components) for one that already does the job (see **Check the shared components first** in `AGENTS.md`).
 If you find yourself rewriting the header, the theme toggle, the footer, a config under `configs/` or a workflow, stop: it is shared, and the skill says where a real shell defect goes instead.
 
 ### With Claude Code

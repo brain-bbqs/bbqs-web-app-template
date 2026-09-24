@@ -1,6 +1,6 @@
 {
   "name": "web-app-template",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A single-page, backend-free web app: the shared shell and tooling of the BBQS companion apps, ready for a new one.",
   "type": "module",
   "license": "MIT",
@@ -14,13 +14,14 @@
     "test:integration": "playwright test --config configs/playwright.config.ts",
     "test:chromatic": "playwright test --config configs/playwright.chromatic.config.ts",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint --config configs/eslint.config.cjs .",
-    "format": "prettier --config configs/prettier.config.cjs --write .",
+    "lint": "eslint --config configs/eslint.config.js .",
+    "format": "prettier --config configs/prettier.config.js --write .",
+    "format:check": "prettier --config configs/prettier.config.js --check .",
     "storybook": "storybook dev -p 6006 --config-dir configs/storybook",
     "build-storybook": "storybook build --config-dir configs/storybook"
   },
-  "dependencies": {},
   "devDependencies": {
+    "@brain-bbqs/config": "^0.1.0",
     "@chromatic-com/playwright": "^0.14.11",
     "@eslint/js": "^9.39.5",
     "@playwright/test": "^1.48.0",

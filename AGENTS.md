@@ -6,11 +6,24 @@ Read it first.
 ## What belongs in an app repository
 
 Every BBQS companion app is the same shell around a different job.
-The shell is what this template provides: the page frame in `index.html` (header with the logo and the light/dark toggle, the BBQS and CON marks, the footer with the version stamp, the bug and feature links and the "What's New" modal), the theme tokens at the top of `src/style.css`, the tooling under `configs/`, the workflows under `.github/`, and the conventions in this file.
+The shell is what this template provides: the page frame in `index.html` (header with the logo and the light/dark toggle, the BBQS and CON marks, the footer with the version stamp, the bug and feature links and the "What's New" modal), the theme tokens at the top of `src/style.css`, the tooling under `configs/` (thin calls into `@brain-bbqs/config`), the workflows under `.github/`, and the conventions in this file.
 An app adds what it does: pure logic under `src/lib/` (one concern per module, each with a unit test), DOM work under `src/ui/`, the wiring in `src/main.ts`, and the markup for it in `index.html`, with every id it touches registered in `src/ui/elements.ts`.
 
 Keep the shell recognizably the same as its siblings, [clip-extractor](https://github.com/brain-bbqs/clip-extractor), [encoding-helper](https://github.com/brain-bbqs/encoding-helper) and [bbqs-uploader](https://github.com/brain-bbqs/bbqs-uploader), which this template was abstracted from.
 When in doubt about how something should look or behave, look there first: a control one of them already has is the one to copy, not to redesign.
+
+## Check the shared components first
+
+Before adding a component, helper, style, test fixture or config to an app, and before setting a new app up, check the shared packages in [`brain-bbqs/bbqs-web-components`](https://github.com/brain-bbqs/bbqs-web-components).
+They are published to npm as `@brain-bbqs/config`, `@brain-bbqs/utils`, `@brain-bbqs/ui`, `@brain-bbqs/ember-client` and `@brain-bbqs/test-utils`, and each package's README lists what it exports and which app files it replaced.
+
+- If a package already provides it, install the package and use it, passing this app's identity (storage keys, OAuth client id, wording) as parameters rather than copying the code in.
+- If a package almost fits, extend it there, with a changeset and a test, rather than keeping a local variant that drifts.
+- If only a sibling app has it, copy it from that sibling; once a second app carries it, it is a candidate for a package (see that repository's `docs/VENDORING.md`).
+- Only when neither a package nor a sibling has it is it this app's own to write.
+
+The template already builds its tooling on `@brain-bbqs/config`.
+The other packages are being adopted app by app in the order `docs/ADOPTION.md` there gives, so a sibling may still carry a local copy of something a package now provides: follow the package, not the copy.
 
 ## When the template is at fault, fix it where it came from
 
@@ -59,7 +72,7 @@ Name the rule, and give just enough of the failure to show why the rule exists.
 ## Code style
 
 - TypeScript strict throughout; no `any`.
-  The type-aware ESLint rules in `configs/eslint.config.cjs` are the floor, not a suggestion, and the pre-commit `eslint` hook runs them with `--fix`.
+  The type-aware ESLint rules `configs/eslint.config.js` takes from `@brain-bbqs/config/eslint` are the floor, not a suggestion, and the pre-commit `eslint` hook runs them with `--fix`.
 - Dynamic strings (file names, API responses, anything a user or a file supplies) reach the DOM through `.textContent`, never by concatenation into `innerHTML`.
   A hardcoded static template assigned via `innerHTML` is fine.
 - No third-party `<script>` tags or CDN includes in `index.html`; only this app's own bundled module loads at runtime.

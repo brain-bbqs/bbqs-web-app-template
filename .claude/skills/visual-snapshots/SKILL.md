@@ -6,13 +6,13 @@ description: How the Chromatic snapshots (Storybook and Playwright) stay determi
 # Visual snapshots and live test injections
 
 Lessons earned across the sibling apps (bbqs-uploader, encoding-helper and clip-extractor) while chasing Chromatic diffs that no code change explained.
-**They are already implemented** in `tests/chromatic/`, `tests/integration/helpers/layout.ts`, `configs/appVersion.ts`, `src/lib/testInjection.ts` and the two Chromatic workflows; the rest of this skill explains what those pieces are doing on your behalf, so that you can tell when you are about to step outside them.
+**They are already implemented** in `tests/chromatic/`, `tests/integration/helpers/layout.ts`, `@brain-bbqs/config` (`resolveAppVersion`, `createPlaywrightConfig`), `src/lib/testInjection.ts` and the two Chromatic workflows; the rest of this skill explains what those pieces are doing on your behalf, so that you can tell when you are about to step outside them.
 
 ## One test per viewport, with the viewport in the title
 
 Chromatic keys a Playwright archive by the test's title alone.
 Run the same test under several Playwright projects and each viewport writes over the last one's manifest, so only the project that ran last reaches Chromatic at all.
-So `playwright.shared.ts` has one Desktop Chrome project, and `tests/chromatic/app.chromatic.test.ts` loops over `VIEWPORTS` from `helpers/layout.ts`, setting the viewport inside each test and naming it in the title (`Main page - default [mobile portrait]`).
+So `createPlaywrightConfig` in `@brain-bbqs/config` gives both Playwright configs one Desktop Chrome project, and `tests/chromatic/app.chromatic.test.ts` loops over `VIEWPORTS` from `helpers/layout.ts`, setting the viewport inside each test and naming it in the title (`Main page - default [mobile portrait]`).
 Add a new page state as another test inside that loop, never as a new project.
 
 ## Fail on sideways overflow by name, not by pixel
@@ -25,7 +25,7 @@ The fix is usually a `@media (max-width: 600px)` rule that lets the row wrap or 
 ## Pin everything that changes on its own
 
 - **The version string.** The footer shows `package.json`'s version, which bumps on every PR.
-  `CHROMATIC_STATIC_VERSION` (set in both Chromatic workflows) makes `configs/appVersion.ts` inject `0.0.0` instead, so a bump alone never re-snapshots a page.
+  `CHROMATIC_STATIC_VERSION` (set in both Chromatic workflows) makes `resolveAppVersion` inject `0.0.0` instead, so a bump alone never re-snapshots a page.
 - **The runner.** Both workflows pin `ubuntu-24.04` rather than `ubuntu-latest`, and print the image version: a runner image bump brings new fonts and rasterizer libraries, which move text pixels with no code change behind them.
   When a diff appears with nothing in the code to explain it, compare the printed image against the baseline run's.
 - **The theme.** Storybook's preview pins `data-theme` through a toolbar global and a decorator, and component stories set it explicitly with `withTheme(...)`, so a snapshot never depends on the runner's OS color-scheme preference.

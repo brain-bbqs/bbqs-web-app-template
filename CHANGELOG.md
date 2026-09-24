@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1
+
+#### 🏠 Internal
+
+- Moved the build, lint, test and Storybook configuration onto the shared `@brain-bbqs/config` package, and pointed new work at the shared components first ([#3](https://github.com/brain-bbqs/web-app-template/pull/3))
+
 ## 0.1.0
 
 #### 🏠 Internal
