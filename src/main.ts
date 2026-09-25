@@ -1,7 +1,7 @@
 import "./style.css";
+import { humanSize } from "@brain-bbqs/utils";
 import changelog from "../CHANGELOG.md?raw";
 import { countChangelogVersions, renderChangelogHtml } from "./lib/changelog";
-import { humanSize } from "./lib/format";
 import { saveStoredTheme } from "./lib/settings";
 import { readTestInjection, synthesizeMockFile } from "./lib/testInjection";
 import { initDropzone } from "./ui/dropzone";
