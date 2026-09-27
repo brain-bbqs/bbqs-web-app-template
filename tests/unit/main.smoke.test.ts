@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 // Boots the real src/main.ts against the real index.html markup and drives the shell end to end
 // (version stamp, file pick and reset, theme toggle, What's New modal). Besides covering main.ts's
-// wiring, this guards the index.html/elements.ts id contract: getElements() throws on import if
-// any registered id is missing from the page.
+// wiring, this guards the index.html/elements.ts id contract: getShell() and getElements() throw
+// on import if any registered id is missing from the page.
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { throwingStorage } from "@brain-bbqs/test-utils/vitest";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import { countChangelogVersions } from "../../src/lib/changelog";
 import { THEME_KEY } from "../../src/lib/settings";
@@ -55,6 +56,20 @@ describe("main.ts boot", () => {
     el("theme-toggle").click();
     expect(document.documentElement.dataset.theme).toBe("light");
     expect(localStorage.getItem(THEME_KEY)).toBe("light");
+  });
+
+  it("still flips the theme when storage refuses the write, and warns rather than throws", () => {
+    const restoreStorage = throwingStorage();
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      el("theme-toggle").click();
+      expect(document.documentElement.dataset.theme).toBe("dark");
+      expect(warn).toHaveBeenCalledTimes(1);
+      expect(warn).toHaveBeenCalledWith("Could not save theme preference:", expect.any(Error));
+    } finally {
+      restoreStorage();
+      warn.mockRestore();
+    }
   });
 
   it("renders the changelog into the What's New modal", () => {

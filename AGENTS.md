@@ -22,7 +22,8 @@ They are published to npm as `@brain-bbqs/config`, `@brain-bbqs/utils`, `@brain-
 - If only a sibling app has it, copy it from that sibling; once a second app carries it, it is a candidate for a package (see that repository's `docs/VENDORING.md`).
 - Only when neither a package nor a sibling has it is it this app's own to write.
 
-The template already builds its tooling on `@brain-bbqs/config`, takes its size formatter and safe storage from `@brain-bbqs/utils`, its stylesheet (theme tokens, page defaults, header, footer and controls) from `@brain-bbqs/ui`, and its Playwright viewport, overflow and theme-seeding helpers from `@brain-bbqs/test-utils`.
+The template already builds its tooling on `@brain-bbqs/config`, takes its size formatter from `@brain-bbqs/utils`, its stylesheet (theme tokens, page defaults, header, footer and controls) from `@brain-bbqs/ui`, and its Playwright viewport, overflow and theme-seeding helpers from `@brain-bbqs/test-utils`.
+Its shell behaviour comes from `@brain-bbqs/ui` too: `initThemeToggle` flips and stores the theme under the app's `THEME_KEY`, `renderVersion` fills the footer's version stamp, `getShellElements` and `required` back the lookups in `src/ui/elements.ts`, and `bindDropzone` with `showDropzoneReject` does the dropzone's drag, click and pick plumbing, leaving `src/ui/dropzone.ts` to say what a drop or a pick means.
 The other packages are being adopted app by app in the order `docs/ADOPTION.md` there gives, so a sibling may still carry a local copy of something a package now provides: follow the package, not the copy.
 
 ## When the template is at fault, fix it where it came from

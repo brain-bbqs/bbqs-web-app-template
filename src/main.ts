@@ -1,12 +1,14 @@
 import "./style.css";
+import { initThemeToggle, renderVersion } from "@brain-bbqs/ui";
 import { humanSize } from "@brain-bbqs/utils";
 import changelog from "../CHANGELOG.md?raw";
 import { countChangelogVersions, renderChangelogHtml } from "./lib/changelog";
-import { saveStoredTheme } from "./lib/settings";
+import { THEME_KEY } from "./lib/settings";
 import { readTestInjection, synthesizeMockFile } from "./lib/testInjection";
 import { initDropzone } from "./ui/dropzone";
-import { getElements } from "./ui/elements";
+import { getElements, getShell } from "./ui/elements";
 
+const shell = getShell();
 const els = getElements();
 
 // ---------------------------------------------------------------------------------------------
@@ -14,8 +16,7 @@ const els = getElements();
 // Every BBQS companion app carries these three, wired the same way; what follows them is the app.
 // ---------------------------------------------------------------------------------------------
 
-// Footer version stamp; the anchor itself already points at the source repository.
-els.versionIndicator.textContent = `v${__APP_VERSION__}`;
+renderVersion(shell.versionIndicator, __APP_VERSION__);
 
 // The modal opens on the latest few versions; "Show more" swaps in the entire changelog for
 // anyone curious enough to keep reading.
@@ -58,15 +59,8 @@ window.addEventListener("hashchange", () => {
 if (window.location.hash === CHANGELOG_HASH) openWhatsNewModal();
 
 // The inline script in index.html already applied any stored theme override before first paint,
-// so the toggle only has to flip and persist it. With nothing stored, data-theme is unset and the
-// OS preference is in effect, so the first click flips away from whatever is currently showing.
-const prefersDark = window.matchMedia("(prefers-color-scheme: dark)");
-els.themeToggle.addEventListener("click", () => {
-  const current = document.documentElement.dataset.theme ?? (prefersDark.matches ? "dark" : "light");
-  const next = current === "dark" ? "light" : "dark";
-  document.documentElement.dataset.theme = next;
-  saveStoredTheme(next);
-});
+// so the toggle only has to flip and persist it, under the key that script reads.
+initThemeToggle(shell.themeToggle, { storageKey: THEME_KEY });
 
 // ---------------------------------------------------------------------------------------------
 // The app: what happens to a loaded file. This is the part the setup skill replaces.

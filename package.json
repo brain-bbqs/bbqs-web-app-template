@@ -1,6 +1,6 @@
 {
   "name": "web-app-template",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A single-page, backend-free web app: the shared shell and tooling of the BBQS companion apps, ready for a new one.",
   "type": "module",
   "license": "MIT",
