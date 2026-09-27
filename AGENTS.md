@@ -6,8 +6,8 @@ Read it first.
 ## What belongs in an app repository
 
 Every BBQS companion app is the same shell around a different job.
-The shell is what this template provides: the page frame in `index.html` (header with the logo and the light/dark toggle, the BBQS and CON marks, the footer with the version stamp, the bug and feature links and the "What's New" modal), the theme tokens at the top of `src/style.css`, the tooling under `configs/` (thin calls into `@brain-bbqs/config`), the workflows under `.github/`, and the conventions in this file.
-An app adds what it does: pure logic under `src/lib/` (one concern per module, each with a unit test), DOM work under `src/ui/`, the wiring in `src/main.ts`, and the markup for it in `index.html`, with every id it touches registered in `src/ui/elements.ts`.
+The shell is what this template provides: the page frame in `index.html` (header with the logo and the light/dark toggle, the BBQS and CON marks, the footer with the version stamp, the bug and feature links and the "What's New" modal), the shared stylesheet `src/style.css` imports from `@brain-bbqs/ui` (theme tokens, page defaults, header, footer and controls), the tooling under `configs/` (thin calls into `@brain-bbqs/config`), the workflows under `.github/`, and the conventions in this file.
+An app adds what it does: pure logic under `src/lib/` (one concern per module, each with a unit test), DOM work under `src/ui/`, the wiring in `src/main.ts`, the markup for it in `index.html` (every id it touches registered in `src/ui/elements.ts`), and its own rules in `src/style.css` below the imports.
 
 Keep the shell recognizably the same as its siblings, [clip-extractor](https://github.com/brain-bbqs/clip-extractor), [encoding-helper](https://github.com/brain-bbqs/encoding-helper) and [bbqs-uploader](https://github.com/brain-bbqs/bbqs-uploader), which this template was abstracted from.
 When in doubt about how something should look or behave, look there first: a control one of them already has is the one to copy, not to redesign.
@@ -22,7 +22,7 @@ They are published to npm as `@brain-bbqs/config`, `@brain-bbqs/utils`, `@brain-
 - If only a sibling app has it, copy it from that sibling; once a second app carries it, it is a candidate for a package (see that repository's `docs/VENDORING.md`).
 - Only when neither a package nor a sibling has it is it this app's own to write.
 
-The template already builds its tooling on `@brain-bbqs/config`, takes its size formatter and safe storage from `@brain-bbqs/utils`, and its Playwright viewport, overflow and theme-seeding helpers from `@brain-bbqs/test-utils`.
+The template already builds its tooling on `@brain-bbqs/config`, takes its size formatter and safe storage from `@brain-bbqs/utils`, its stylesheet (theme tokens, page defaults, header, footer and controls) from `@brain-bbqs/ui`, and its Playwright viewport, overflow and theme-seeding helpers from `@brain-bbqs/test-utils`.
 The other packages are being adopted app by app in the order `docs/ADOPTION.md` there gives, so a sibling may still carry a local copy of something a package now provides: follow the package, not the copy.
 
 ## When the template is at fault, fix it where it came from
@@ -79,7 +79,8 @@ Name the rule, and give just enough of the failure to show why the rule exists.
   Keep runtime dependencies minimal and each one justified.
 - Controls are drawn as inline SVG stroked with `currentColor` rather than emoji: Windows renders emoji in color presentation, while a stroked path stays monochrome and follows the theme.
   Decorative emoji in body text, marked `aria-hidden`, are fine.
-- Light and dark theme values live in the two identical dark blocks at the top of `src/style.css` and must be updated together.
+- Light and dark theme values come from `@brain-bbqs/ui`'s `tokens.css`, and its layout knobs are listed in that package's README.
+  To add a color or change a value, redeclare it on `:root` after the imports in `src/style.css`, in a light block and two identical dark blocks updated together; never copy a shared rule in to change it.
   Every color is a token; no component carries a hex value of its own.
 - Keep inline comments sparse.
   Explain non-obvious "why", never "what".

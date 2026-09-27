@@ -12,7 +12,7 @@ Both are real, buildable values, so the template runs as-is and every occurrence
 ## What you are and are not writing
 
 Every BBQS companion app is the same shell around a different job: a single-page, backend-free page that loads something, does something with it in the browser, and shows or saves the result.
-The shell arrives from the template: the page frame in `index.html`, the theme tokens and shell styles in `src/style.css`, the three shared behaviors at the top of `src/main.ts` (version stamp, What's New modal, theme toggle), the tooling under `configs/`, the workflows under `.github/`, and the conventions in `AGENTS.md`.
+The shell arrives from the template: the page frame in `index.html`, the shared theme tokens and shell styles that `src/style.css` imports from `@brain-bbqs/ui`, the three shared behaviors at the top of `src/main.ts` (version stamp, What's New modal, theme toggle), the tooling under `configs/`, the workflows under `.github/`, and the conventions in `AGENTS.md`.
 
 So this repository adds **what the app does**, in these places, and little else:
 
@@ -22,13 +22,14 @@ So this repository adds **what the app does**, in these places, and little else:
 | `src/lib/`           | Pure logic, one concern per module, no DOM. Each module has a unit test in `tests/unit/`.                           |
 | `src/ui/`            | DOM work, taking the elements it needs from `src/ui/elements.ts`, where every id the app touches is registered.     |
 | `src/main.ts`        | Wiring only, below the shell section. Reads `?test` injections and substitutes fakes at the one point each applies. |
+| `src/style.css`      | The app's own rules, below the `@brain-bbqs/ui` imports, using the shared tokens and controls wherever they fit.    |
 | `tests/`, `stories/` | See step 3.                                                                                                         |
 
 Do **not** rewrite, restyle or "improve" any of the following.
 They are the shell, shared with every sibling app, and a divergent copy here is a copy that drifts:
 
 - the header, the theme toggle and its pre-paint script, the BBQS watermark, the footer bar, the What's New modal and the version stamp;
-- the theme tokens (add tokens if the app needs more colors, keep both dark blocks identical, never hardcode a hex in a component);
+- the `@brain-bbqs/ui` imports at the top of `src/style.css`, and the theme tokens and knobs they bring (redeclare a token or knob on `:root` after the imports to change it, add a color as a new token in a light block and two identical dark blocks, never copy a shared rule in, never hardcode a hex in a component);
 - anything under `configs/` beyond passing the shared `@brain-bbqs/config` factories an app-specific option, such as a runtime dependency's alias or chunking rule where the build genuinely needs it (a default that is wrong for every app is fixed in that package instead);
 - the workflows, beyond the one hostname in `preview.yml` (step 1) and the template guards (step 6);
 - the `?test` injection scheme, the `getElements()` id-lookup pattern, the changelog format.
@@ -39,7 +40,7 @@ That is the whole point of it being shared.
 ## 0. Check the shared components first
 
 Before writing anything in steps 2 and 3, check [`brain-bbqs/bbqs-web-components`](https://github.com/brain-bbqs/bbqs-web-components) for a package that already does it, and repeat the check for every component you are about to add.
-It publishes the code the sibling apps have in common as `@brain-bbqs/*` npm packages: `config` (tooling, already used by `configs/`), `utils` (formatting, queues, path sanitization, safe storage; already used for the size formatter and the theme setting's storage), `ui` (theme toggle, account menu, footer, dropzone, human-subjects banner, DOM helpers, shared CSS), `ember-client` (EMBER sign-in, API calls, the dataset picker) and `test-utils` (Playwright and Vitest helpers, already used by `tests/`).
+It publishes the code the sibling apps have in common as `@brain-bbqs/*` npm packages: `config` (tooling, already used by `configs/`), `utils` (formatting, queues, path sanitization, safe storage; already used for the size formatter and the theme setting's storage), `ui` (theme toggle, account menu, footer, dropzone, human-subjects banner, DOM helpers, shared CSS; its stylesheet is already imported by `src/style.css`), `ember-client` (EMBER sign-in, API calls, the dataset picker) and `test-utils` (Playwright and Vitest helpers, already used by `tests/`).
 Each package's README says what it exports.
 
 - A package that provides it: `npm install` it and pass this app's identity (storage keys, client id, wording) as options.

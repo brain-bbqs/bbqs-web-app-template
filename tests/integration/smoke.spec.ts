@@ -6,8 +6,8 @@ import { dropFile } from "./helpers/drop";
 test.describe("Web App Template shell", () => {
   test("renders branding, version, and the picker", async ({ page }) => {
     // Wide enough that the corner watermark and footer bar stay in their fixed, viewport-anchored
-    // spots instead of the narrow-screen fallback (see the max-width: 1400px query in style.css)
-    // that hides the watermark and flows the footer into the page to avoid overlapping cards.
+    // spots instead of the narrow-screen fallback (the max-width: 1400px query in @brain-bbqs/ui's
+    // shell.css) that hides the watermark and flows the footer into the page to avoid overlapping cards.
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/");
     await expect(page).toHaveTitle("Web App Template");
@@ -18,7 +18,7 @@ test.describe("Web App Template shell", () => {
     const versionLink = page.locator("#version-indicator");
     await expect(versionLink).toHaveText(/^v\d+\.\d+\.\d+$/);
     await expect(versionLink).toHaveAttribute("href", "https://github.com/brain-bbqs/web-app-template");
-    await expect(page.locator('a.con-brand-link[href="https://centerforopenneuroscience.org"]')).toBeVisible();
+    await expect(page.locator('a.footer-brand-link[href="https://centerforopenneuroscience.org"]')).toBeVisible();
     await expect(page.locator("#dropzone")).toBeVisible();
     await expect(page.locator("#file-card")).toBeHidden();
   });
@@ -88,6 +88,6 @@ test.describe("Web App Template shell", () => {
     await expect(page.locator(".brand-watermark-link")).toBeHidden();
     // The footer stays, but in normal document flow under the page content.
     await expect(page.locator(".page-footer-bar")).toHaveCSS("position", "static");
-    await expect(page.locator(".con-brand-link")).toBeVisible();
+    await expect(page.locator(".footer-brand-link")).toBeVisible();
   });
 });
