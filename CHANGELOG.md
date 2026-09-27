@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.4
+
+#### 🏠 Internal
+
+- Moved the page's theme and shell styles onto the shared `@brain-bbqs/ui` stylesheet, with no visible change ([#6](https://github.com/brain-bbqs/web-app-template/pull/6))
+
 ## 0.1.3
 
 #### 🏠 Internal
