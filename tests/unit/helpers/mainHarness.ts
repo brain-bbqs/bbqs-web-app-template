@@ -18,7 +18,7 @@ export function pickFile(file: File): void {
 }
 
 export function installMatchMedia(matches = false): void {
-  // jsdom has no matchMedia; main.ts only reads `.matches` for the theme toggle's starting point.
+  // jsdom has no matchMedia; the theme toggle only reads `.matches` for its starting point.
   window.matchMedia = ((query: string) => ({
     matches,
     media: query,

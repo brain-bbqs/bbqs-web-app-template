@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.5
+
+#### 🏠 Internal
+
+- Moved the theme toggle, version stamp and dropzone wiring onto the shared `@brain-bbqs/ui` helpers, with no visible change ([#7](https://github.com/brain-bbqs/web-app-template/pull/7))
+
 ## 0.1.4
 
 #### 🏠 Internal

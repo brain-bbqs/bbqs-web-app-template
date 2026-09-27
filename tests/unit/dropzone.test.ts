@@ -3,6 +3,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { initDropzone } from "../../src/ui/dropzone";
 import type { AppElements } from "../../src/ui/elements";
 
+// The drag styling, the input's own click, a drop without a DataTransfer and the window-level
+// guard are @brain-bbqs/ui's bindDropzone and tested there; these cover what the app wires into it.
+
 interface Harness {
   dz: HTMLDivElement;
   reject: HTMLParagraphElement;
@@ -66,15 +69,6 @@ describe("initDropzone browse wiring", () => {
     expect(click).toHaveBeenCalledTimes(1);
   });
 
-  it("keeps a click on the hidden input itself from bubbling into another picker open", () => {
-    const { fileInput } = setup();
-    const click = vi.spyOn(fileInput, "click").mockImplementation(() => {});
-    // The input's own (synthetic) click bubbles up through the dropzone; stopPropagation must
-    // keep the dropzone's click handler from opening a second picker on top.
-    fileInput.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    expect(click).not.toHaveBeenCalled();
-  });
-
   it("hands the picked file over and clears the input so the same file can be picked again", () => {
     const { fileInput, onFile } = setup();
     const file = new File(["x"], "notes.txt");
@@ -94,16 +88,6 @@ describe("initDropzone browse wiring", () => {
 });
 
 describe("initDropzone drag & drop", () => {
-  it("toggles the dragover styling across the drag lifecycle", () => {
-    const { dz } = setup();
-    dz.dispatchEvent(new Event("dragenter", { cancelable: true }));
-    expect(dz.classList.contains("dragover")).toBe(true);
-    dz.dispatchEvent(new Event("dragleave", { cancelable: true }));
-    expect(dz.classList.contains("dragover")).toBe(false);
-    dz.dispatchEvent(new Event("dragover", { cancelable: true }));
-    expect(dz.classList.contains("dragover")).toBe(true);
-  });
-
   it("hands over the first dropped file and drops the dragover styling", () => {
     const { dz, onFile } = setup();
     const first = new File(["a"], "a.txt");
@@ -144,23 +128,5 @@ describe("initDropzone drag & drop", () => {
     dz.dispatchEvent(dropEvent(transferOf([])));
     expect(onFile).not.toHaveBeenCalled();
     expect(reject.hidden).toBe(true);
-  });
-
-  it("ignores a drop event without a DataTransfer entirely", () => {
-    const { dz, reject, onFile } = setup();
-    dz.dispatchEvent(new Event("drop", { bubbles: true, cancelable: true }));
-    expect(onFile).not.toHaveBeenCalled();
-    expect(reject.hidden).toBe(true);
-  });
-
-  it("prevents the browser's default navigation for drags that miss the dropzone", () => {
-    setup();
-    const dragover = new Event("dragover", { cancelable: true });
-    window.dispatchEvent(dragover);
-    expect(dragover.defaultPrevented).toBe(true);
-
-    const drop = new Event("drop", { cancelable: true });
-    window.dispatchEvent(drop);
-    expect(drop.defaultPrevented).toBe(true);
   });
 });

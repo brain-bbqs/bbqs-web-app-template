@@ -1,48 +1,13 @@
-// @vitest-environment jsdom
-import { throwingStorage } from "@brain-bbqs/test-utils/vitest";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { loadStoredTheme, saveStoredTheme, THEME_KEY } from "../../src/lib/settings";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { describe, expect, it } from "vitest";
+import { THEME_KEY } from "../../src/lib/settings";
 
-let restoreStorage: (() => void) | undefined;
-
-beforeEach(() => {
-  localStorage.clear();
-});
-
-afterEach(() => {
-  restoreStorage?.();
-  restoreStorage = undefined;
-  vi.restoreAllMocks();
-});
-
-describe("stored theme", () => {
-  it("is null until the toggle has ever been used", () => {
-    expect(loadStoredTheme()).toBe(null);
-  });
-
-  it("round-trips a saved choice", () => {
-    saveStoredTheme("dark");
-    expect(localStorage.getItem(THEME_KEY)).toBe("dark");
-    expect(loadStoredTheme()).toBe("dark");
-    saveStoredTheme("light");
-    expect(loadStoredTheme()).toBe("light");
-  });
-
-  it("ignores a stored value that is not a theme", () => {
-    localStorage.setItem(THEME_KEY, "sepia");
-    expect(loadStoredTheme()).toBe(null);
-  });
-
-  it("reads as unset when storage is unavailable", () => {
-    restoreStorage = throwingStorage();
-    expect(loadStoredTheme()).toBe(null);
-  });
-
-  it("warns rather than throws when storage refuses the write", () => {
-    restoreStorage = throwingStorage();
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    expect(() => saveStoredTheme("dark")).not.toThrow();
-    expect(warn).toHaveBeenCalledTimes(1);
-    expect(warn).toHaveBeenCalledWith("Could not save theme preference:", expect.any(Error));
+// Storing, loading and refusing the theme are @brain-bbqs/ui's (initThemeToggle) and are tested
+// there; the app's part is the key, which the toggle and the pre-paint script have to share.
+describe("THEME_KEY", () => {
+  it("is namespaced by this app's package name", () => {
+    const { name } = JSON.parse(readFileSync(resolve(process.cwd(), "package.json"), "utf-8")) as { name: string };
+    expect(THEME_KEY).toBe(`${name}.theme`);
   });
 });

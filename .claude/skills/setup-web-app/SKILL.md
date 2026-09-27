@@ -12,7 +12,7 @@ Both are real, buildable values, so the template runs as-is and every occurrence
 ## What you are and are not writing
 
 Every BBQS companion app is the same shell around a different job: a single-page, backend-free page that loads something, does something with it in the browser, and shows or saves the result.
-The shell arrives from the template: the page frame in `index.html`, the shared theme tokens and shell styles that `src/style.css` imports from `@brain-bbqs/ui`, the three shared behaviors at the top of `src/main.ts` (version stamp, What's New modal, theme toggle), the tooling under `configs/`, the workflows under `.github/`, and the conventions in `AGENTS.md`.
+The shell arrives from the template: the page frame in `index.html`, the shared theme tokens and shell styles that `src/style.css` imports from `@brain-bbqs/ui`, the three shared behaviors at the top of `src/main.ts` (version stamp and theme toggle through `@brain-bbqs/ui`'s `renderVersion` and `initThemeToggle`, and the What's New modal), the tooling under `configs/`, the workflows under `.github/`, and the conventions in `AGENTS.md`.
 
 So this repository adds **what the app does**, in these places, and little else:
 
@@ -32,7 +32,7 @@ They are the shell, shared with every sibling app, and a divergent copy here is 
 - the `@brain-bbqs/ui` imports at the top of `src/style.css`, and the theme tokens and knobs they bring (redeclare a token or knob on `:root` after the imports to change it, add a color as a new token in a light block and two identical dark blocks, never copy a shared rule in, never hardcode a hex in a component);
 - anything under `configs/` beyond passing the shared `@brain-bbqs/config` factories an app-specific option, such as a runtime dependency's alias or chunking rule where the build genuinely needs it (a default that is wrong for every app is fixed in that package instead);
 - the workflows, beyond the one hostname in `preview.yml` (step 1) and the template guards (step 6);
-- the `?test` injection scheme, the `getElements()` id-lookup pattern, the changelog format.
+- the `?test` injection scheme, the `getShell()`/`getElements()` id-lookup pattern (the shell's ids through `@brain-bbqs/ui`'s `getShellElements`), the changelog format.
 
 If something in the shell is wrong for this app, it is probably wrong for its siblings too: fix it in [`brain-bbqs/web-app-template`](https://github.com/brain-bbqs/web-app-template) so the next app gets the fix, and port the same change here.
 That is the whole point of it being shared.
@@ -40,7 +40,7 @@ That is the whole point of it being shared.
 ## 0. Check the shared components first
 
 Before writing anything in steps 2 and 3, check [`brain-bbqs/bbqs-web-components`](https://github.com/brain-bbqs/bbqs-web-components) for a package that already does it, and repeat the check for every component you are about to add.
-It publishes the code the sibling apps have in common as `@brain-bbqs/*` npm packages: `config` (tooling, already used by `configs/`), `utils` (formatting, queues, path sanitization, safe storage; already used for the size formatter and the theme setting's storage), `ui` (theme toggle, account menu, footer, dropzone, human-subjects banner, DOM helpers, shared CSS; its stylesheet is already imported by `src/style.css`), `ember-client` (EMBER sign-in, API calls, the dataset picker) and `test-utils` (Playwright and Vitest helpers, already used by `tests/`).
+It publishes the code the sibling apps have in common as `@brain-bbqs/*` npm packages: `config` (tooling, already used by `configs/`), `utils` (formatting, queues, path sanitization, safe storage; already used for the size formatter), `ui` (theme toggle, account menu, footer, dropzone, human-subjects banner, DOM helpers, shared CSS; already used for the stylesheet `src/style.css` imports, the theme toggle, the version stamp, the shell's element lookups and the dropzone's plumbing), `ember-client` (EMBER sign-in, API calls, the dataset picker) and `test-utils` (Playwright and Vitest helpers, already used by `tests/`).
 Each package's README says what it exports.
 
 - A package that provides it: `npm install` it and pass this app's identity (storage keys, client id, wording) as options.
@@ -69,7 +69,7 @@ grep -rn --exclude-dir=node_modules --exclude-dir=dist --exclude=package-lock.js
 ## 2. Decide what the app loads and shows
 
 The template opens on a file dropzone and swaps to a loaded-file card, because every sibling app opens by loading something.
-Keep the dropzone (adapting its `accept` attribute and prose to what the app takes) or, if the app loads from somewhere else (a URL, an archive listing, a sign-in), replace the picker card while keeping the two-state shape: a picker, and the app once something is loaded.
+Keep the dropzone (adapting its `accept` attribute and prose to what the app takes, and what `onDrop` and `onPick` do with a file in `src/ui/dropzone.ts`; its drag, click and pick plumbing is `@brain-bbqs/ui`'s `bindDropzone`) or, if the app loads from somewhere else (a URL, an archive listing, a sign-in), replace the picker card while keeping the two-state shape: a picker, and the app once something is loaded.
 
 Then, for the app itself:
 
