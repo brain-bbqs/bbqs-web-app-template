@@ -4,7 +4,7 @@
 
 #### 🏠 Internal
 
-- Moved the What's New modal and the unit-test boot harness onto the shared `@brain-bbqs/ui` and `@brain-bbqs/test-utils` packages, with no visible change
+- Moved the What's New modal and the unit-test boot harness onto the shared `@brain-bbqs/ui` and `@brain-bbqs/test-utils` packages, with no visible change ([#8](https://github.com/brain-bbqs/web-app-template/pull/8))
 
 ## 0.1.5
 
