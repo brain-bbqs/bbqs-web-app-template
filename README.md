@@ -33,7 +33,7 @@ So a repository generated from it holds only what makes the app different from i
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `index.html`            | The static page: the shared frame (header, light/dark toggle, BBQS and CON marks, footer with version stamp and What's New) around the app's own cards.                                                |
 | `src/main.ts`           | The wiring: the shell's three shared behaviors (version stamp, What's New modal, theme toggle), then the app.                                                                                          |
-| `src/lib/`              | Pure logic, one concern per module, each unit-tested. Ships with the theme setting, the changelog renderer and the `?test` injection reader; the size formatter comes from `@brain-bbqs/utils`.        |
+| `src/lib/`              | Pure logic, one concern per module, each unit-tested. Ships with the theme setting and the `?test` injection reader; the size formatter comes from `@brain-bbqs/utils`.                                |
 | `src/ui/`               | DOM work: the typed id lookups in `elements.ts` (every id the app touches, so a missing one fails on import) and the file dropzone.                                                                    |
 | `src/style.css`         | The shared theme tokens, shell and controls, imported from `@brain-bbqs/ui`, then the app's own rules.                                                                                                 |
 | `tests/unit/`           | Vitest. `main.*.test.ts` boot the real `main.ts` against the real `index.html`, one file per boot scenario.                                                                                            |
@@ -49,7 +49,7 @@ So a repository generated from it holds only what makes the app different from i
 Three conventions do most of the work of keeping the apps alike:
 
 - **The version stamp.** `package.json`'s version is injected at build time as `__APP_VERSION__` (by `@brain-bbqs/config`'s `resolveAppVersion`), shown in the footer, and bumped on every PR that touches the app (the Version Check workflow enforces it). Chromatic pins it to `0.0.0` so a bump alone never re-snapshots a page.
-- **The changelog feeds the page.** `CHANGELOG.md` is imported raw and rendered into the What's New modal (`src/lib/changelog.ts`), also reachable at `#changelog`, so a change is described once, for the person using the app.
+- **The changelog feeds the page.** `CHANGELOG.md` is imported raw and rendered into the What's New modal (`@brain-bbqs/ui`'s `initWhatsNew`), also reachable at `#changelog`, so a change is described once, for the person using the app.
 - **`?test` injections.** A URL like `?test&mock_file` drives the deployed page into a real UI state with no local file, no sign-in and no network, so a person can eyeball each state live and the Chromatic snapshots can capture it deterministically. `?test` alone is a no-op.
 
 Local development:

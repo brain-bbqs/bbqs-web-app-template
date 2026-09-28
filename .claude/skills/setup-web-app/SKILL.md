@@ -12,7 +12,7 @@ Both are real, buildable values, so the template runs as-is and every occurrence
 ## What you are and are not writing
 
 Every BBQS companion app is the same shell around a different job: a single-page, backend-free page that loads something, does something with it in the browser, and shows or saves the result.
-The shell arrives from the template: the page frame in `index.html`, the shared theme tokens and shell styles that `src/style.css` imports from `@brain-bbqs/ui`, the three shared behaviors at the top of `src/main.ts` (version stamp and theme toggle through `@brain-bbqs/ui`'s `renderVersion` and `initThemeToggle`, and the What's New modal), the tooling under `configs/`, the workflows under `.github/`, and the conventions in `AGENTS.md`.
+The shell arrives from the template: the page frame in `index.html`, the shared theme tokens and shell styles that `src/style.css` imports from `@brain-bbqs/ui`, the three shared behaviors at the top of `src/main.ts` (version stamp, theme toggle and What's New modal, through `@brain-bbqs/ui`'s `renderVersion`, `initThemeToggle` and `initWhatsNew`), the tooling under `configs/`, the workflows under `.github/`, and the conventions in `AGENTS.md`.
 
 So this repository adds **what the app does**, in these places, and little else:
 
@@ -40,7 +40,7 @@ That is the whole point of it being shared.
 ## 0. Check the shared components first
 
 Before writing anything in steps 2 and 3, check [`brain-bbqs/bbqs-web-components`](https://github.com/brain-bbqs/bbqs-web-components) for a package that already does it, and repeat the check for every component you are about to add.
-It publishes the code the sibling apps have in common as `@brain-bbqs/*` npm packages: `config` (tooling, already used by `configs/`), `utils` (formatting, queues, path sanitization, safe storage; already used for the size formatter), `ui` (theme toggle, account menu, footer, dropzone, human-subjects banner, DOM helpers, shared CSS; already used for the stylesheet `src/style.css` imports, the theme toggle, the version stamp, the shell's element lookups and the dropzone's plumbing), `ember-client` (EMBER sign-in, API calls, the dataset picker) and `test-utils` (Playwright and Vitest helpers, already used by `tests/`).
+It publishes the code the sibling apps have in common as `@brain-bbqs/*` npm packages: `config` (tooling, already used by `configs/`), `utils` (formatting, queues, path sanitization, safe storage; already used for the size formatter), `ui` (theme toggle, account menu, footer, What's New modal, dropzone, human-subjects banner, DOM helpers, shared CSS; already used for the stylesheet `src/style.css` imports, the theme toggle, the version stamp, the What's New modal, the shell's element lookups and the dropzone's plumbing), `ember-client` (EMBER sign-in, API calls, the dataset picker) and `test-utils` (Playwright and Vitest helpers, already used by `tests/`, including the unit tests' `createMainHarness` and `expectIdContract`).
 Each package's README says what it exports.
 
 - A package that provides it: `npm install` it and pass this app's identity (storage keys, client id, wording) as options.
@@ -57,7 +57,7 @@ Find every occurrence first; the list below is what the template ships with, and
 grep -rn --exclude-dir=node_modules --exclude-dir=dist --exclude=package-lock.json -e "web-app-template" -e "Web App Template" .
 ```
 
-- `web-app-template` → the repository name, in: `package.json` (`name`), `index.html` (the footer's issue links and version link), `src/lib/settings.ts` (`THEME_KEY`, which `configs/vite.config.ts` also hands to the pre-paint script), `public/CNAME` and `.github/workflows/preview.yml` (`pages-base-url`, both `<app-name>.brain-bbqs.org`), `README.md` (badges), `AGENTS.md` (the changelog PR-link format), `docs/README.md` (the live links), `CHANGELOG.md`, `tests/unit/changelog.test.ts` and `tests/integration/smoke.spec.ts`.
+- `web-app-template` → the repository name, in: `package.json` (`name`), `index.html` (the footer's issue links and version link), `src/lib/settings.ts` (`THEME_KEY`, which `configs/vite.config.ts` also hands to the pre-paint script), `public/CNAME` and `.github/workflows/preview.yml` (`pages-base-url`, both `<app-name>.brain-bbqs.org`), `README.md` (badges), `AGENTS.md` (the changelog PR-link format), `docs/README.md` (the live links), `CHANGELOG.md` and `tests/integration/smoke.spec.ts`.
   Then `npm install` so `package-lock.json` follows.
 - `Web App Template` → the display title, in: `index.html` (`<title>`, `<h1>`, the header logo's `alt`), `README.md`, both files under `.github/ISSUE_TEMPLATE/`, `src/assets/app-logo.svg` and `tests/integration/smoke.spec.ts`.
 - The subtitle under the header in `index.html`, and the one-line description at the top of `README.md` and in `package.json`: what the app does, from the reader's side, in one sentence.
@@ -88,7 +88,8 @@ Then, for the app itself:
 
 - A unit test per `src/lib/` module; jsdom tests for `src/ui/` modules against hand-built elements (see `tests/unit/dropzone.test.ts`).
 - One `tests/unit/main.<scenario>.test.ts` per boot scenario, through `tests/unit/helpers/mainHarness.ts`; the plain boot and each `?test` injection worth its own file.
-- `tests/integration/smoke.spec.ts` covers the shell; add a spec per feature, driving the page the way a person would, with `?test` injections rather than `page.route` stubbing wherever they reach the same state.
+  That harness is `createMainHarness` from `@brain-bbqs/test-utils/vitest`; pass it `canvas` or `observers` if `main.ts` draws or observes at boot, rather than stubbing them by hand.
+- `tests/unit/elements.test.ts` keeps `index.html` and `src/ui/elements.ts` in step through `expectIdContract` from `@brain-bbqs/test-utils/vitest`; register every new id in `getElements()` rather than listing it in `pageOnly`.- `tests/integration/smoke.spec.ts` covers the shell; add a spec per feature, driving the page the way a person would, with `?test` injections rather than `page.route` stubbing wherever they reach the same state.
 - `tests/chromatic/app.chromatic.test.ts` snapshots each page state at every viewport in `VIEWPORTS` and fails on sideways overflow, through `forEachViewport` and `expectNoHorizontalOverflow` from `@brain-bbqs/test-utils/playwright`; add a `forEachViewport` call per new state.
 - A story per component state, in both themes (see `stories/Dropzone.stories.ts`), and keep `stories/App.stories.ts` rendering the real `index.html` with each loaded state applied by hand.
 - Ratchet the coverage thresholds in `configs/vitest.config.ts` to just below what `npm run test:coverage` measures once the app's tests are in.

@@ -22,8 +22,8 @@ They are published to npm as `@brain-bbqs/config`, `@brain-bbqs/utils`, `@brain-
 - If only a sibling app has it, copy it from that sibling; once a second app carries it, it is a candidate for a package (see that repository's `docs/VENDORING.md`).
 - Only when neither a package nor a sibling has it is it this app's own to write.
 
-The template already builds its tooling on `@brain-bbqs/config`, takes its size formatter from `@brain-bbqs/utils`, its stylesheet (theme tokens, page defaults, header, footer and controls) from `@brain-bbqs/ui`, and its Playwright viewport, overflow and theme-seeding helpers from `@brain-bbqs/test-utils`.
-Its shell behaviour comes from `@brain-bbqs/ui` too: `initThemeToggle` flips and stores the theme under the app's `THEME_KEY`, `renderVersion` fills the footer's version stamp, `getShellElements` and `required` back the lookups in `src/ui/elements.ts`, and `bindDropzone` with `showDropzoneReject` does the dropzone's drag, click and pick plumbing, leaving `src/ui/dropzone.ts` to say what a drop or a pick means.
+The template already builds its tooling on `@brain-bbqs/config`, takes its size formatter from `@brain-bbqs/utils`, its stylesheet (theme tokens, page defaults, header, footer, controls and the What's New modal) from `@brain-bbqs/ui`, its Playwright viewport, overflow and theme-seeding helpers from `@brain-bbqs/test-utils/playwright`, and its unit-test boot harness and id contract (`createMainHarness`, `expectIdContract`) from `@brain-bbqs/test-utils/vitest`.
+Its shell behaviour comes from `@brain-bbqs/ui` too: `initThemeToggle` flips and stores the theme under the app's `THEME_KEY`, `renderVersion` fills the footer's version stamp, `getShellElements`, `getWhatsNewElements` and `required` back the lookups in `src/ui/elements.ts`, `initWhatsNew` renders `CHANGELOG.md` into the What's New modal and opens it from the footer link or at `#changelog`, and `bindDropzone` with `showDropzoneReject` does the dropzone's drag, click and pick plumbing, leaving `src/ui/dropzone.ts` to say what a drop or a pick means.
 The other packages are being adopted app by app in the order `docs/ADOPTION.md` there gives, so a sibling may still carry a local copy of something a package now provides: follow the package, not the copy.
 
 ## When the template is at fault, fix it where it came from
@@ -93,7 +93,9 @@ Name the rule, and give just enough of the failure to show why the rule exists.
 - Unit tests live in `tests/unit/` (Vitest, node by default; a suite that needs a DOM starts with `// @vitest-environment jsdom`), integration tests in `tests/integration/` (Playwright against the built app), and the Chromatic snapshots in `tests/chromatic/`.
 - Every module under `src/lib/` has a unit test.
   DOM modules under `src/ui/` are tested in jsdom against hand-built elements.
-  `src/main.ts` is tested by booting it against the real `index.html` through `tests/unit/helpers/mainHarness.ts`, one test file per boot scenario, which also guards the `index.html`/`elements.ts` id contract.
+  `src/main.ts` is tested by booting it against the real `index.html` through `tests/unit/helpers/mainHarness.ts`, one test file per boot scenario.
+  That harness is `createMainHarness` from `@brain-bbqs/test-utils/vitest`, created once with the app's own `import("../../../src/main")`; do not hand-roll a boot.
+  `tests/unit/elements.test.ts` checks the `index.html`/`elements.ts` id contract both ways with `expectIdContract` from the same entry point.
 - The coverage thresholds in `configs/vitest.config.ts` are a ratchet: set just below what is measured, raised as coverage improves, never lowered to make a PR pass.
 - A UI state worth a screenshot gets a `?test&...` injection (see `docs/README.md` and the `visual-snapshots` skill), so a Chromatic snapshot and a person can both reach it from a URL.
 - Use `it.each` wherever it reduces duplication.
