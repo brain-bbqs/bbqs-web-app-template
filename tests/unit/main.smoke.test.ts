@@ -6,8 +6,8 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { throwingStorage } from "@brain-bbqs/test-utils/vitest";
+import { countChangelogVersions } from "@brain-bbqs/ui";
 import { beforeAll, describe, expect, it, vi } from "vitest";
-import { countChangelogVersions } from "../../src/lib/changelog";
 import { THEME_KEY } from "../../src/lib/settings";
 import { bootMain, el, pickFile } from "./helpers/mainHarness";
 

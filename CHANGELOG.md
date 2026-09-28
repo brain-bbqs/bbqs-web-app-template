@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.6
+
+#### 🏠 Internal
+
+- Moved the What's New modal and the unit-test boot harness onto the shared `@brain-bbqs/ui` and `@brain-bbqs/test-utils` packages, with no visible change
+
 ## 0.1.5
 
 #### 🏠 Internal

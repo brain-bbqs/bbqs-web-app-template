@@ -16,7 +16,7 @@ grep -rn "innerHTML\|outerHTML\|insertAdjacentHTML" src/
 
 For every hit, confirm any _dynamic_ (user-supplied, API-returned, file-derived, or otherwise non-literal) string is assigned via `.textContent` (or an `element.value` type property) rather than concatenated into the HTML string itself.
 A fixed, hardcoded template assigned via `innerHTML` is fine; the risk is interpolating untrusted data into HTML source, not the property name.
-As shipped, the template's `innerHTML` uses follow this pattern (the What's New modal renders `CHANGELOG.md` through an escaping renderer in `src/lib/changelog.ts`; the dropzone's refusal text is built from text nodes and `<br>` elements).
+As shipped, the template's own code under `src/` has no `innerHTML` use: the dropzone's refusal text is built from text nodes and `<br>` elements, and the What's New modal is drawn by `@brain-bbqs/ui`'s `initWhatsNew`, which builds `CHANGELOG.md` into DOM nodes and never parses it as markup.
 Keep it that way: this is the property that makes accepting client-side credential storage a reasonable call for an app of this shape.
 
 Also keep an eye on:

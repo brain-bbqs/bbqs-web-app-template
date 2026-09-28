@@ -1,7 +1,7 @@
 // Typed lookups for the static skeleton markup in index.html. Every id the app touches is
 // registered here, so a renamed or dropped element fails on import (and in the boot smoke test)
 // rather than as a null dereference somewhere down the page.
-import { getShellElements, required } from "@brain-bbqs/ui";
+import { getShellElements, getWhatsNewElements, required } from "@brain-bbqs/ui";
 
 /** The shell's theme toggle and version stamp, looked up by @brain-bbqs/ui (no account menu here). */
 export function getShell() {
@@ -19,11 +19,7 @@ export function getElements() {
     fileSummaryName: required<HTMLSpanElement>("file-summary-name"),
     fileSummaryStats: required<HTMLSpanElement>("file-summary-stats"),
     changeFileBtn: required<HTMLButtonElement>("change-file-btn"),
-    whatsNewButton: required<HTMLButtonElement>("whats-new-button"),
-    whatsNewModal: required<HTMLDialogElement>("whats-new-modal"),
-    whatsNewClose: required<HTMLButtonElement>("whats-new-close"),
-    whatsNewContent: required<HTMLDivElement>("whats-new-content"),
-    whatsNewShowMore: required<HTMLButtonElement>("whats-new-show-more"),
+    whatsNew: getWhatsNewElements(),
   };
 }
 
