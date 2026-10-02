@@ -103,6 +103,7 @@ None of this is code, and none of it can be done from the template; each is a se
   `public/CNAME` is what keeps the custom domain across deploys.
 - **Secrets** (Settings → Secrets and variables → Actions): `CODECOV_TOKEN` (from the Codecov project), `CHROMATIC_STORYBOOK_PROJECT_TOKEN` and `CHROMATIC_PLAYWRIGHT_PROJECT_TOKEN` (two Chromatic projects, one per kind of snapshot; each sibling app has both).
   Until they exist, the Lint workflow's upload step and both Chromatic workflows fail.
+  The `setup-chromatic` skill walks through creating the two projects and writes the developer-facing section on stories versus Playwright snapshots; the stories, tests, configs and workflows it describes are already here.
 - **Codecov**: add the repository; `.github/.codecov.yml` is already in place.
 - **pre-commit.ci**: install it on the repository; `.pre-commit-config.yaml` already skips the `eslint` hook there.
 - **Dependabot** reviews go to the reviewer named in `.github/dependabot.yml`; change it if this app's maintainer differs.
@@ -131,7 +132,7 @@ These pieces document the template itself, not the generated app; delete them in
 - The README **How it works** section: the generated app's README should describe only the app itself, in the shape its siblings use (logo, title, badges, one line, credits).
 - The README **Repository setup** section (including its **With Claude Code** subsection) and the **Note** block above **How it works**.
 - `.claude/skills/setup-web-app/`: this skill has no purpose once setup is done.
-  Keep `frontend-security`, `reuse-license-setup` and `visual-snapshots`; they are about the app, not the template.
+  Keep `frontend-security`, `reuse-license-setup`, `setup-chromatic` and `visual-snapshots`; they are about the app, not the template.
 - The `if: github.repository != 'brain-bbqs/bbqs-web-app-template'` conditions in `.github/workflows/` (`deploy.yml`, `preview.yml`, both Chromatic workflows, and the Codecov step in `lint.yml`).
   They exist so the template does not deploy a placeholder page or fail on secrets it does not have; this repository is not the template, so each condition is already true and every trigger runs.
   Deleting them is tidiness rather than a fix, and leaving them costs this app nothing.
