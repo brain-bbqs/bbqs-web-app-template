@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.7
+
+#### 🏠 Internal
+
+- Updated frontend build dependencies (npm group update) ([#14](https://github.com/brain-bbqs/bbqs-web-app-template/pull/14))
+
 ## 0.1.6
 
 #### 🏠 Internal
