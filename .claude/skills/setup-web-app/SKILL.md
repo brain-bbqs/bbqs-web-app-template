@@ -57,8 +57,10 @@ Find every occurrence first; the list below is what the template ships with, and
 grep -rn --exclude-dir=node_modules --exclude-dir=dist --exclude=package-lock.json -e "web-app-template" -e "Web App Template" .
 ```
 
-- `web-app-template` → the repository name, in: `package.json` (`name`), `index.html` (the footer's issue links and version link), `src/lib/settings.ts` (`THEME_KEY`, which `configs/vite.config.ts` also hands to the pre-paint script), `public/CNAME` and `.github/workflows/preview.yml` (`pages-base-url`, both `<app-name>.brain-bbqs.org`), `README.md` (badges), `AGENTS.md` (the changelog PR-link format), `docs/README.md` (the live links), `CHANGELOG.md` and `tests/integration/smoke.spec.ts`.
+- `web-app-template` → the repository name, in: `package.json` (`name`), `index.html` (the footer's issue links and version link), `src/lib/settings.ts` (`THEME_KEY`, which `configs/vite.config.ts` also hands to the pre-paint script), `.github/workflows/preview.yml` (`pages-base-url`, `<app-name>.brain-bbqs.org`), `README.md` (badges), `AGENTS.md` (the changelog PR-link format), `docs/README.md` (the live links), `CHANGELOG.md` and `tests/integration/smoke.spec.ts`.
   Then `npm install` so `package-lock.json` follows.
+- The address: an app served at `<app-name>.brain-bbqs.org` creates `public/CNAME` holding that hostname (the template ships none, so that its own repository never claims a domain).
+  An app served at the default `<owner>.github.io/<app-name>` instead (one outside the brain-bbqs organization, or without a DNS record) has no `public/CNAME` and deletes the `pages-base-url` line from `preview.yml`, whose action then defaults to that address; the built app's relative `base` already works under the sub-path.
 - `Web App Template` → the display title, in: `index.html` (`<title>`, `<h1>`, the header logo's `alt`), `README.md`, both files under `.github/ISSUE_TEMPLATE/`, `src/assets/app-logo.svg` and `tests/integration/smoke.spec.ts`.
 - The subtitle under the header in `index.html`, and the one-line description at the top of `README.md` and in `package.json`: what the app does, from the reader's side, in one sentence.
 - The logo: replace `src/assets/app-logo.svg` with the app's own mark (it is the header logo and the favicon; add PNG favicon sizes the way encoding-helper does if the app wants them).
@@ -99,8 +101,8 @@ Then, for the app itself:
 
 None of this is code, and none of it can be done from the template; each is a setting on the generated repository:
 
-- **GitHub Pages**: source is the `gh-pages` branch (the Deploy workflow creates it on the first push to `main`), custom domain `<app-name>.brain-bbqs.org`, with a DNS `CNAME` record for it pointing at `brain-bbqs.github.io`.
-  `public/CNAME` is what keeps the custom domain across deploys.
+- **GitHub Pages**: source is the `gh-pages` branch (the Deploy workflow creates it on the first push to `main`).
+  For a custom domain (step 1), set `<app-name>.brain-bbqs.org` there, with a DNS `CNAME` record for it pointing at `brain-bbqs.github.io`; `public/CNAME` is what keeps the custom domain across deploys.
 - **Secrets** (Settings → Secrets and variables → Actions): `CODECOV_TOKEN` (from the Codecov project), `CHROMATIC_STORYBOOK_PROJECT_TOKEN` and `CHROMATIC_PLAYWRIGHT_PROJECT_TOKEN` (two Chromatic projects, one per kind of snapshot; each sibling app has both).
   Until they exist, the Lint workflow's upload step and both Chromatic workflows fail.
   The `setup-chromatic` skill walks through creating the two projects and writes the developer-facing section on stories versus Playwright snapshots; the stories, tests, configs and workflows it describes are already here.
@@ -137,5 +139,5 @@ These pieces document the template itself, not the generated app; delete them in
   They exist so the template does not deploy a placeholder page or fail on secrets it does not have; this repository is not the template, so each condition is already true and every trigger runs.
   Deleting them is tidiness rather than a fix, and leaving them costs this app nothing.
 - `CHANGELOG.md`: replace its contents with a single `## 0.1.0` heading and one `#### 🏠 Internal` entry describing this setup PR, so the What's New modal opens on the app's own history.
-  Leave `package.json` at `0.1.0`.
+  Set `package.json`'s version to `0.1.0` as well (then `npm install`): the template's own version counts the template's history, not the app's, and the Version Check workflow only asks that the PR's version differ from `main`'s.
 - The **What belongs in an app repository** paragraph in `AGENTS.md` stays; it is about the app.
