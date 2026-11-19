@@ -9,7 +9,7 @@ targets:
 dependencies:
   apm:
     - git: con/skills
-      ref: c65afe50b2cb09fc31fadf5e216daf7297f11e61
+      ref: 71e788c662d97165881b1dbc733dcd34210d979d
       skills:
         - setup-chromatic
   mcp: []
