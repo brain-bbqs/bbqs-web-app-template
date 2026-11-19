@@ -18,8 +18,9 @@ The result is the layout below, which is what [dandi/usage-page](https://github.
 When in doubt about a detail, open one of them and copy what it does rather than inventing a variant.
 
 ```
-.github/workflows/chromatic-storybook.yml   # builds Storybook, uploads it to the Storybook project
-.github/workflows/chromatic-playwright.yml  # runs tests/chromatic, uploads the archives to the Playwright project
+.github/workflows/chromatic-storybook.yml   # builds Storybook with no token, hands it on as an artifact
+.github/workflows/chromatic-playwright.yml  # runs tests/chromatic, builds the archive Storybook, hands it on
+.github/workflows/chromatic-publish.yml     # uploads each build to its project from main; auto-accepts main's
 configs/storybook/main.ts                   # html-vite framework, no addons, stories glob
 configs/storybook/preview.ts                # the app's stylesheet, theme pinned through a decorator
 configs/playwright.config.ts                # tests/integration (the ordinary Playwright suite)
@@ -46,7 +47,7 @@ Read the repository's `AGENTS.md` or `CLAUDE.md`, its `README.md`, `package.json
 | Where the app lives   | `index.html` at the root or under `src/`, the stylesheet (`src/style.css` or `src/styles.css`), `src/assets/` for the logo. Story and preview imports point at these.                                                  |
 | How the app themes    | A `data-theme` attribute on `<html>`, a stored key in `localStorage` (`theme`, `<app>.theme`), an OS-preference fallback. The preview decorator and the dark-theme snapshot must pin it the same way the app reads it. |
 | A version stamp       | A footer that shows `package.json`'s version (injected as `__APP_VERSION__` by Vite). If there is one, it has to be pinned for Chromatic (step 8), or every version bump re-snapshots everything.                      |
-| Node version          | Match the repo's other workflows, but not below 22: `@chromatic-com/playwright` 0.15+ is ESM-only and requires Node 22.                                                                                                |
+| Node version          | `lts/*` in the three Chromatic workflows, as usage-page's use, and never below 22: `@chromatic-com/playwright` 0.15+ is ESM-only and requires Node 22.                                                                 |
 | A BBQS app?           | If `@brain-bbqs/config` is in `devDependencies`, the configs and helpers already exist as factories; see "When the repo is a BBQS companion app" and use those instead of the vanilla templates.                       |
 
 Also note what the conventions file asks for around a change like this: the BBQS and STAMPED repos bump `package.json`'s version when `configs/` or `package.json` change, add a `#### 🏠 Internal` line to `CHANGELOG.md`, and run `pre-commit` before pushing.
@@ -413,41 +414,56 @@ Two projects on the same repository, which Chromatic calls sub-projects:
 2. **Add project** again, pick the same repository a second time, and name this one for Playwright.
 3. Copy each project's token (Manage → Configure) into a repository secret under Settings → Secrets and variables → Actions: `CHROMATIC_STORYBOOK_PROJECT_TOKEN` and `CHROMATIC_PLAYWRIGHT_PROJECT_TOKEN`.
 
-Until both secrets exist, both workflows fail; that is expected and is why the README's setup steps list them.
+Until both secrets exist, the publish workflow fails (the two build workflows need no token); that is expected and is why the README's setup steps list them.
 Each project posts its own status check on pull requests.
 
 ## Step 7. Workflows (`.github/workflows/`)
+
+Three files, in the form [dandi/usage-page](https://github.com/dandi/usage-page/tree/main/.github/workflows) uses: two build the captures with no token, and a third uploads them to Chromatic from `main`.
+Building without a token lets a pull request from a fork get snapshots, since a fork's run gets no secrets.
+Uploading from one place lets a push to `main` be accepted as the new baseline on its own, since it was already reviewed on its pull request.
+Without that, every merge leaves a build waiting for review in Chromatic, and a notification about it.
 
 `chromatic-storybook.yml`:
 
 ```yaml
 name: Chromatic (Storybook)
 
-on: push
+# Builds Storybook without the project token, so it is safe to run on pull requests from forks.
+# The build is handed to `chromatic-publish.yml` as an artifact, and that workflow, which runs
+# from `main` with the project token, uploads it to Chromatic.
 
-permissions:
-  contents: read
+on:
+  push:
+  pull_request:
 
 jobs:
   chromatic:
+    # Named for the required check it satisfies; Chromatic's own statuses on the commit report
+    # the result of the upload.
     name: Run Chromatic (Storybook)
-    # Dependabot-triggered runs cannot read Actions secrets, so the Chromatic project token is
-    # unavailable; skip instead of failing.
-    if: github.actor != 'dependabot[bot]'
+    # A branch in this repository is already built on push, which a fork's branch never is here,
+    # so only a fork's pull request is built as one.
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     # Pinned rather than ubuntu-latest: a runner image bump (system fonts, antialiasing,
     # rasterizer) shifts screenshot pixels on its own, with no code change to explain it.
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v7
         with:
-          # The whole history: Chromatic picks the baseline from it, and TurboSnap needs it.
+          # The commit Chromatic reports on, rather than the merge commit a pull request would
+          # otherwise check out.
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
 
       - name: Report the runner image
         # The ubuntu-24.04 label is not a fixed machine: the image behind it is rebuilt roughly
-        # weekly, and a new one brings new fonts and rasterizer libraries. Printed so a snapshot
-        # diff with no code change behind it can be checked against the image its baseline used.
+        # weekly, and a new one brings new fonts and rasterizer libraries, which move text pixels
+        # on their own. Printed so a snapshot diff with no code change behind it can be checked
+        # against the image its baseline was drawn on.
         # (A block scalar: the colon in the message would otherwise make this line invalid YAML.)
         run: |
           echo "Runner image: ${ImageOS:-unknown} ${ImageVersion:-unknown}"
@@ -469,27 +485,30 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version: lts/*
           cache: npm
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Run Chromatic
-        uses: chromaui/action@v18.10.2
+      - name: Build Storybook
+        run: npm run build-storybook -- --output-dir storybook-static
         env:
           # Pins the footer's version string so a version bump alone does not re-snapshot every story.
           CHROMATIC_STATIC_VERSION: "true"
+
+      - name: Upload Storybook
+        uses: actions/upload-artifact@v7
         with:
-          projectToken: ${{ secrets.CHROMATIC_STORYBOOK_PROJECT_TOKEN }}
-          # TurboSnap: only stories whose files changed are re-snapshotted.
-          onlyChanged: true
+          name: chromatic-build
+          path: storybook-static/
+          retention-days: 1
 ```
 
-`chromatic-playwright.yml` is a copy of that file with four edits:
+`chromatic-playwright.yml` is a copy of that file with three edits:
 
 1. `name: Chromatic (Playwright)`; the job id becomes `chromatic-playwright` and its `name: Run Chromatic (Playwright)`.
-2. Two steps inserted after `Install dependencies`:
+2. `Build Storybook` is replaced by three steps, which run the snapshot tests (the version pin moves onto the step that builds the app) and build a Storybook from the archives they leave under `test-results/`:
 
    ```yaml
    - name: Install Playwright browsers
@@ -500,23 +519,119 @@ jobs:
      env:
        # Pins the footer's version string so a version bump alone does not re-snapshot the page.
        CHROMATIC_STATIC_VERSION: "true"
+
+   # Called directly rather than through `npm exec`, which would take `--output-dir` as one of
+   # its own options.
+   - name: Build archive Storybook
+     run: ./node_modules/.bin/build-archive-storybook --output-dir=storybook-static
    ```
 
-3. The `Run Chromatic` step loses its `env` block (the pin was applied when the app was built, in the step above) and `onlyChanged` (TurboSnap cannot apply to a black-box archive of the running app), and gains `playwright: true`, which builds a Storybook from the archives under `test-results/` and uploads that:
+3. The upload step becomes `Upload archive Storybook`, with the same artifact name, `chromatic-build`, which the publish workflow downloads.
 
-   ```yaml
-   - name: Run Chromatic
-     uses: chromaui/action@v18.10.2
-     with:
-       projectToken: ${{ secrets.CHROMATIC_PLAYWRIGHT_PROJECT_TOKEN }}
-       playwright: true
-   ```
+`chromatic-publish.yml`:
 
-4. The token is the Playwright project's, as shown.
+```yaml
+name: Chromatic publish
 
-Pin `chromaui/action` to the newest release tag when writing the files (`v18.10.2` at the time of writing; the sibling repos carry `v18.10.1` from when they were set up).
-`@latest` would track every release, breaking ones included, and a floating dependency is one more thing that can move a snapshot with no code change behind it.
-`on: push` is deliberate: Chromatic needs every commit on a branch to have a build, or it has no baseline to compare the next one with.
+# Uploads the builds made by `chromatic-storybook.yml` and `chromatic-playwright.yml` to
+# Chromatic. A pull request from a fork gets no secrets, so those workflows cannot upload for it
+# themselves; `workflow_run` always runs this file as it is on `main`, with the project tokens.
+#
+# Nothing from the pushed commit is executed here. The Chromatic CLI is installed from `main`,
+# and the commit is checked out only so that the CLI can read its git history, which is how
+# Chromatic picks the baselines to compare the build against.
+
+on:
+  workflow_run:
+    workflows:
+      - Chromatic (Storybook)
+      - Chromatic (Playwright)
+    types:
+      - completed
+
+jobs:
+  publish:
+    name: Publish to Chromatic
+    # A fork running these workflows on its own pushes has no project tokens to publish with.
+    if: github.event.repository.fork == false && github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v7
+        with:
+          path: main
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+          cache: npm
+          cache-dependency-path: main/package-lock.json
+
+      - name: Install the Chromatic CLI
+        working-directory: main
+        run: npm ci --ignore-scripts
+
+      # By hash, since a fork's commit is on none of this repository's branches.
+      - name: Checkout the built commit
+        env:
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          SERVER_URL: ${{ github.server_url }}
+        run: |
+          git init --quiet commit
+          cd commit
+          git remote add origin "$SERVER_URL/$GITHUB_REPOSITORY.git"
+          git fetch --quiet --no-tags origin '+refs/heads/*:refs/remotes/origin/*' "$HEAD_SHA"
+          git checkout --quiet --detach "$HEAD_SHA"
+
+      - name: Download build
+        uses: actions/download-artifact@v8
+        with:
+          name: chromatic-build
+          path: ${{ runner.temp }}/storybook-static
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+
+      - name: Publish to Chromatic
+        working-directory: commit
+        env:
+          CHROMATIC_PROJECT_TOKEN: ${{ github.event.workflow_run.name == 'Chromatic (Playwright)' && secrets.CHROMATIC_PLAYWRIGHT_PROJECT_TOKEN || secrets.CHROMATIC_STORYBOOK_PROJECT_TOKEN }}
+          # What the Chromatic action reports for a pull request; set by hand since this runs on
+          # `workflow_run`, not on the push or pull request itself.
+          CHROMATIC_SHA: ${{ github.event.workflow_run.head_sha }}
+          CHROMATIC_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          CHROMATIC_SLUG: ${{ github.event.workflow_run.head_repository.full_name }}
+          # Only a push to this repository's own `main` is accepted as the new baseline: it was
+          # already reviewed on its pull request, and a fork's branch may be named `main` too.
+          AUTO_ACCEPT: ${{ github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.head_repository.full_name == github.repository }}
+        run: |
+          # An explicit, empty config file, so that a `chromatic.config.json` in the commit is not
+          # read.
+          echo '{}' > "$RUNNER_TEMP/chromatic.config.json"
+          args=(
+            --storybook-build-dir "$RUNNER_TEMP/storybook-static"
+            --config-file "$RUNNER_TEMP/chromatic.config.json"
+            --exit-zero-on-changes
+          )
+          if [[ "$AUTO_ACCEPT" == true ]]; then
+            args+=(--auto-accept-changes)
+          fi
+          "$GITHUB_WORKSPACE/main/node_modules/.bin/chromatic" "${args[@]}"
+```
+
+What the three files rely on, so that an edit does not break it:
+
+- The `workflows:` list in `chromatic-publish.yml` names the other two by their `name:` lines, exactly.
+- `on: push` is deliberate: Chromatic needs every commit on a branch to have a build, or it has no baseline to compare the next one with.
+  `pull_request` is there for forks only; the job's `if` skips it for a branch of this repository, which its push already built.
+- `Run Chromatic (...)` stays the job name because branch protection requires it; the upload's result reaches the commit as Chromatic's own status checks.
+- The CLI is the `chromatic` devDependency from step 1, installed from `main`'s lockfile, so it is pinned and moves only with an npm update.
+- `--exit-zero-on-changes` keeps the publish run green when there are diffs; they are reviewed in Chromatic, from its status check.
+- TurboSnap (`onlyChanged`) is not used: it needs Storybook's build stats beside the prebuilt Storybook, and usage-page does without it.
+- In the BBQS web-app template, the publish job's `if` also starts with `github.repository != 'brain-bbqs/web-app-template' &&`, since the template has no Chromatic projects; a repository generated from it can keep or drop that.
 
 ## Step 8. Housekeeping
 
@@ -584,7 +699,7 @@ Replace the names, states and script names with the app's own; the shape to keep
 ## Visual snapshots
 
 Every push is rendered on [Chromatic](https://www.chromatic.com) and compared against the last accepted baseline, twice: once per story, once per page state.
-The two feeds answer different questions, which is why there are two projects, two workflows and two badges.
+The two feeds answer different questions, which is why there are two projects, two build workflows and two badges.
 
 ### Stories versus Playwright snapshots
 
@@ -604,12 +719,13 @@ Neither keeps pixels in this repository: Chromatic renders both in its own brows
 
 1. Create two Chromatic projects for this repository: one for Storybook, then **Add project**, pick the same repository again, and name the second one for Playwright.
 2. Add each project's token as a repository secret: `CHROMATIC_STORYBOOK_PROJECT_TOKEN` and `CHROMATIC_PLAYWRIGHT_PROJECT_TOKEN`.
-3. Push. `chromatic-storybook.yml` and `chromatic-playwright.yml` under `.github/workflows/` run on every push; the first build of each project is its baseline, accepted by hand in Chromatic.
+3. Push. `chromatic-storybook.yml` and `chromatic-playwright.yml` under `.github/workflows/` build on every push, and `chromatic-publish.yml` uploads each build; the first build of each project is its baseline, accepted by hand in Chromatic.
+   After that, a build of `main` is accepted on its own, since its changes were reviewed on their pull request.
 
 ### Day to day
 
 1. `npm run storybook` to look at the stories; `npm run test:chromatic` to run the page captures locally. Nothing is uploaded from a local run.
-2. Push a branch. Each workflow uploads its captures, and Chromatic posts one status check per project.
+2. Push a branch. Each build workflow captures its feed, `chromatic-publish.yml` uploads it, and Chromatic posts one status check per project.
 3. Open the check and review each diff: accept what was intended, otherwise fix and push again. Chromatic diffs a branch against that branch's own last build, so merge `main` in first when the branch is behind, or `main`'s changes show up as yours.
 4. A new component state gets a story in both themes; a new page state gets a `forEachViewport` test in `tests/chromatic/`, plus a way to reach it deterministically.
 ```
@@ -619,17 +735,18 @@ Where the repo also compares pixels with Playwright's own `toHaveScreenshot` (da
 ## Step 10. Verify
 
 ```bash
-npm run build-storybook                 # the Storybook the action will upload
+npm run build-storybook                 # the Storybook the workflow builds and the publish uploads
 npm run storybook                       # every story, in both themes, by eye
 npm run test:chromatic                  # the archives land in test-results/chromatic-archives/
-./node_modules/.bin/build-archive-storybook --output-dir=storybook-static   # what the action does with them
+./node_modules/.bin/build-archive-storybook --output-dir=storybook-static   # what the Playwright workflow builds from them
 npx chromatic --project-token=<storybook token>              # optional: the first baseline, from a machine
 npx chromatic --playwright --project-token=<playwright token>
 npm run format && npm run lint && pre-commit run --all-files
 ```
 
 Call `build-archive-storybook` through its path, not `npm exec`, which takes `--output-dir` as one of its own options and drops it.
-Then push, watch both workflows go green, accept the first build of each project in Chromatic, and confirm the two badges render.
+Then push, watch both build workflows go green, and merge; the first push to `main` is the first one `chromatic-publish.yml` runs for, since `workflow_run` only fires from a file already on the default branch.
+Accept the first build of each project in Chromatic, and confirm the two badges render.
 
 ## Keeping snapshots deterministic
 
@@ -677,13 +794,13 @@ import { expectNoHorizontalOverflow, forEachViewport } from "@brain-bbqs/test-ut
 ```
 
 `resolveAppVersion` in that package already honors `CHROMATIC_STATIC_VERSION`.
-A repository generated from `bbqs-web-app-template` has all of this, plus the two workflows, in place; what it still needs is step 6 and the README.
+A repository generated from `bbqs-web-app-template` has all of this, plus the three workflows, in place; what it still needs is step 6 and the README.
 
 ## When pull requests come from forks
 
-Secrets are not available to a fork's pull request, so the workflows above cannot upload for it.
-dandi/usage-page, which takes outside contributions, splits each workflow in two: `chromatic.yml` and `chromatic-playwright.yml` build with no token (Storybook via `build-storybook`, the archives via `build-archive-storybook --output-dir=storybook-static`) and upload `storybook-static/` as a one-day artifact; `chromatic-publish.yml` runs on `workflow_run`, from `main` and therefore with the tokens, checks out the built commit by hash for the git history Chromatic reads baselines from, downloads the artifact, and runs the CLI with `--storybook-build-dir`, `--exit-zero-on-changes`, `CHROMATIC_SHA`/`CHROMATIC_BRANCH`/`CHROMATIC_SLUG` set from the triggering run, and `--auto-accept-changes` only for a push to the repository's own `main`.
-Copy those three files from that repository when this applies; the single-workflow form is right for a repository whose contributors all push branches to it.
+The workflows in step 7 already handle them: the two build workflows build a fork's pull request with no token, and `chromatic-publish.yml` uploads it from `main`.
+A repository set up before this form runs `chromaui/action` with the token straight from one workflow per feed, which cannot upload for a fork and leaves every build of `main` waiting for review in Chromatic.
+Move such a repository to the three files of step 7 rather than adding `autoAcceptChanges` to the old ones, so it matches usage-page and the template.
 
 ## Troubleshooting
 
@@ -695,7 +812,8 @@ Copy those three files from that repository when this applies; the single-workfl
 | `Failed to run chromatic --playwright`                                    | No Chromium project; Chromatic archives only from Chromium.                                                                                    |
 | Every story re-snapshotted after a version bump                           | The version stamp is not pinned under `CHROMATIC_STATIC_VERSION` in the Vite config Storybook loads (or in `viteFinal`, when it loads none).   |
 | Text pixels moved with no code change                                     | The runner image changed (compare the printed `ImageVersion`), or the branch is behind `main`. Accept, or merge `main` and re-read.            |
-| Workflow fails on a Dependabot or fork branch                             | No secrets there. The `dependabot[bot]` guard skips the former; for forks, see the section above.                                              |
+| `Publish to Chromatic` fails with no project token                        | A step 6 secret is missing. If only Dependabot's branches fail, add both tokens as Dependabot secrets too (Settings → Secrets and variables).  |
+| Builds of `main` still wait for review after a merge                      | `AUTO_ACCEPT` did not hold: the merge was not a push to this repository's `main` (a merge queue, or a default branch with another name).       |
 | `ERR_REQUIRE_ESM` or Node version errors from `@chromatic-com/playwright` | 0.15+ is ESM-only and needs Node 22; raise `node-version` in the workflow.                                                                     |
 | Stories show the wrong theme on CI                                        | Nothing pins it; the runner's OS preference won. Add the preview decorator and `withTheme`.                                                    |
 | The raw `index.html` story shows broken images                            | Its `/src/assets/...` URLs bypass Vite; add the `staticDirs` mount in `main.ts`.                                                               |
