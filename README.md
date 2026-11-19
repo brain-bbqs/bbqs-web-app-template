@@ -44,7 +44,7 @@ So a repository generated from it holds only what makes the app different from i
 | `.github/workflows/`    | Lint (typecheck, lint, unit tests with coverage to Codecov), Test (Playwright), Version Check (a `package.json` bump per PR), Deploy (to `gh-pages`), PR preview, and the two Chromatic builds and their upload.          |
 | `CHANGELOG.md`          | One entry per PR, in the reader's words. It is what the What's New modal shows, so it is the app's release notes.                                                                                                         |
 | `docs/`                 | `README.md` lists the `?test&...` live test injections; `user_tests/` holds the manual checklist and one filled copy per tester.                                                                                          |
-| `AGENTS.md`, `.claude/` | The conventions an agent (or a person) works to, the setup skill, and the skills that survive setup (`frontend-security`, `reuse-license-setup`, `setup-chromatic`, `visual-snapshots`). `CLAUDE.md` imports `AGENTS.md`. |
+| `AGENTS.md`, `.claude/` | The conventions an agent (or a person) works to, the setup skill, the kept skills (`frontend-security`, `reuse-license-setup`, `visual-snapshots`), and `setup-chromatic` via `apm.yml`. `CLAUDE.md` imports `AGENTS.md`. |
 
 Three conventions do most of the work of keeping the apps alike:
 

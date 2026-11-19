@@ -1,0 +1,2 @@
+# Written by `apm install`, which writes it back in its own format on every install.
+apm.lock.yaml
