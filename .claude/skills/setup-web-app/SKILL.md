@@ -54,10 +54,10 @@ The **What belongs in an app repository** and **Check the shared components firs
 Find every occurrence first; the list below is what the template ships with, and grep is what proves nothing was missed:
 
 ```bash
-grep -rn --exclude-dir=node_modules --exclude-dir=dist --exclude=package-lock.json -e "web-app-template" -e "Web App Template" .
+grep -rn --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=apm_modules --exclude-dir=setup-chromatic --exclude=package-lock.json -e "web-app-template" -e "Web App Template" .
 ```
 
-- `web-app-template` → the repository name, in: `package.json` (`name`), `index.html` (the footer's issue links and version link), `src/lib/settings.ts` (`THEME_KEY`, which `configs/vite.config.ts` also hands to the pre-paint script), `public/CNAME` and `.github/workflows/preview.yml` (`pages-base-url`, both `<app-name>.brain-bbqs.org`), `README.md` (badges), `AGENTS.md` (the changelog PR-link format), `docs/README.md` (the live links), `CHANGELOG.md` and `tests/integration/smoke.spec.ts`.
+- `web-app-template` → the repository name, in: `package.json` (`name`), `apm.yml` (`name`), `index.html` (the footer's issue links and version link), `src/lib/settings.ts` (`THEME_KEY`, which `configs/vite.config.ts` also hands to the pre-paint script), `public/CNAME` and `.github/workflows/preview.yml` (`pages-base-url`, both `<app-name>.brain-bbqs.org`), `README.md` (badges), `AGENTS.md` (the changelog PR-link format), `docs/README.md` (the live links), `CHANGELOG.md` and `tests/integration/smoke.spec.ts`.
   Then `npm install` so `package-lock.json` follows.
 - `Web App Template` → the display title, in: `index.html` (`<title>`, `<h1>`, the header logo's `alt`), `README.md`, both files under `.github/ISSUE_TEMPLATE/`, `src/assets/app-logo.svg` and `tests/integration/smoke.spec.ts`.
 - The subtitle under the header in `index.html`, and the one-line description at the top of `README.md` and in `package.json`: what the app does, from the reader's side, in one sentence.
@@ -102,8 +102,8 @@ None of this is code, and none of it can be done from the template; each is a se
 - **GitHub Pages**: source is the `gh-pages` branch (the Deploy workflow creates it on the first push to `main`), custom domain `<app-name>.brain-bbqs.org`, with a DNS `CNAME` record for it pointing at `brain-bbqs.github.io`.
   `public/CNAME` is what keeps the custom domain across deploys.
 - **Secrets** (Settings → Secrets and variables → Actions): `CODECOV_TOKEN` (from the Codecov project), `CHROMATIC_STORYBOOK_PROJECT_TOKEN` and `CHROMATIC_PLAYWRIGHT_PROJECT_TOKEN` (two Chromatic projects, one per kind of snapshot; each sibling app has both).
-  Until they exist, the Lint workflow's upload step and both Chromatic workflows fail.
-  The `setup-chromatic` skill walks through creating the two projects and writes the developer-facing section on stories versus Playwright snapshots; the stories, tests, configs and workflows it describes are already here.
+  Until they exist, the Lint workflow's upload step and the Chromatic publish workflow fail (the two Chromatic build workflows need no token).
+  The `setup-chromatic` skill (installed from [con/skills](https://github.com/con/skills) by `apm install --frozen`, see `AGENTS.md`) walks through creating the two projects and writes the developer-facing section on stories versus Playwright snapshots; the stories, tests, configs and workflows it describes are already here.
 - **Codecov**: add the repository; `.github/.codecov.yml` is already in place.
 - **pre-commit.ci**: install it on the repository; `.pre-commit-config.yaml` already skips the `eslint` hook there.
 - **Dependabot** reviews go to the reviewer named in `.github/dependabot.yml`; change it if this app's maintainer differs.
@@ -132,8 +132,8 @@ These pieces document the template itself, not the generated app; delete them in
 - The README **How it works** section: the generated app's README should describe only the app itself, in the shape its siblings use (logo, title, badges, one line, credits).
 - The README **Repository setup** section (including its **With Claude Code** subsection) and the **Note** block above **How it works**.
 - `.claude/skills/setup-web-app/`: this skill has no purpose once setup is done.
-  Keep `frontend-security`, `reuse-license-setup`, `setup-chromatic` and `visual-snapshots`; they are about the app, not the template.
-- The `if: github.repository != 'brain-bbqs/bbqs-web-app-template'` conditions in `.github/workflows/` (`deploy.yml`, `preview.yml`, both Chromatic workflows, and the Codecov step in `lint.yml`).
+  Keep `frontend-security`, `reuse-license-setup` and `visual-snapshots`, and `apm.yml` with `apm.lock.yaml`, which install `setup-chromatic`; they are about the app, not the template.
+- The `if: github.repository != 'brain-bbqs/bbqs-web-app-template'` conditions in `.github/workflows/` (`deploy.yml`, `preview.yml`, the publish job in `chromatic-publish.yml`, and the Codecov step in `lint.yml`).
   They exist so the template does not deploy a placeholder page or fail on secrets it does not have; this repository is not the template, so each condition is already true and every trigger runs.
   Deleting them is tidiness rather than a fix, and leaving them costs this app nothing.
 - `CHANGELOG.md`: replace its contents with a single `## 0.1.0` heading and one `#### 🏠 Internal` entry describing this setup PR, so the What's New modal opens on the app's own history.
