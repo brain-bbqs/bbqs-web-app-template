@@ -4,8 +4,8 @@ dependencies:
 - repo_url: con/skills
   name: con-skills
   host: github.com
-  resolved_commit: c241a4e9ec492d885c58864737280fef8637b269
-  resolved_ref: c241a4e9ec492d885c58864737280fef8637b269
+  resolved_commit: c65afe50b2cb09fc31fadf5e216daf7297f11e61
+  resolved_ref: c65afe50b2cb09fc31fadf5e216daf7297f11e61
   version: 0.1.0
   package_type: skill_bundle
   deployed_files:
@@ -34,15 +34,15 @@ dependencies:
   - .claude/skills/setup-chromatic/templates/tests/chromatic/viewports.ts
   deployed_file_hashes:
     .claude/skills/setup-chromatic/SKILL.md: sha256:014a7008d460a98e2d679fe8d550ba5482094a879f77b0d5807063872c2dad7b
-    .claude/skills/setup-chromatic/references/publish-workflow.md: sha256:b20a2efe245a73a806972b047c4b2b045bdaf2de9560e00043383fed7ece7827
+    .claude/skills/setup-chromatic/references/publish-workflow.md: sha256:9d3f6031fed5433005eeacbed08eff3c5df9c2af199ebe84b7e00d9453c03981
     .claude/skills/setup-chromatic/references/several-pages.md: sha256:fa38a73e0c433b11c696ce136f4242e1a3079055fa3c9eafc49611525b7c06a4
     .claude/skills/setup-chromatic/references/shared-package.md: sha256:f97887d8d64b03eb2c66c6d28a5f6ff9906d49bced3acf09a50b1645bbf687b3
-    .claude/skills/setup-chromatic/references/troubleshooting.md: sha256:f9cf4715b9461c16baba1b49bf7375cc0d88d12538be1f224d99fe8878763158
+    .claude/skills/setup-chromatic/references/troubleshooting.md: sha256:7236f5e0f2dd6ec59e5e2cf24addfb105ea0c0c01f9fffabd5b13e44f62ee621
     .claude/skills/setup-chromatic/templates/.github/workflows/chromatic-playwright.yml: sha256:5e6c970c4feb4c9c02fd4c298492c7a6350e97c0853a55cf82427ae3581f7ed8
-    .claude/skills/setup-chromatic/templates/.github/workflows/chromatic-publish.yml: sha256:43bcb1fafb0cd424257ebdced5990b5f03793c2d6bb8a373864cd52b335d7f43
+    .claude/skills/setup-chromatic/templates/.github/workflows/chromatic-publish.yml: sha256:7a86e0916781cac2e040d7226a66d297bd7dcf5aad8c2230901cc31f75e9f9c1
     .claude/skills/setup-chromatic/templates/.github/workflows/chromatic-storybook.yml: sha256:6368348fe5970d7b42b04809811c591bc64521e9aae6ed476cf328a923004369
     .claude/skills/setup-chromatic/templates/AGENTS-visual-snapshots.md: sha256:869050b1022ffce4b8bcdb6f43d857d1ee60c2ee0c892d0a31d75091a359ed86
-    .claude/skills/setup-chromatic/templates/README-visual-snapshots.md: sha256:94deb85738deec64d8fd9e3b10d90af45233df85703035348621dc5c4caf10fb
+    .claude/skills/setup-chromatic/templates/README-visual-snapshots.md: sha256:9d793f0596cbfc8378cc47f5ee2dcfe774ed796b314f361815dba0823cca4342
     .claude/skills/setup-chromatic/templates/configs/pages.ts: sha256:6547685773cba623f5444211c5bf2dc0cba849d56011b37f72cd2ebefbecf909
     .claude/skills/setup-chromatic/templates/configs/playwright.chromatic.config.ts: sha256:0363a49019f129c7a0af717ea6c154971e44d93f5b0b1aa94e446dd6fdf7a6aa
     .claude/skills/setup-chromatic/templates/configs/storybook/main.ts: sha256:0938ac7849150c91f9ac3022eb2ffba008499a47f897dd4a4f1b251f8d4f1b67
@@ -55,7 +55,7 @@ dependencies:
     .claude/skills/setup-chromatic/templates/tests/chromatic/page.chromatic.test.ts: sha256:49a38a620994c0d5f0536da8d4eaa765e01a870d5bfa8dbccef25b047c3cb4d5
     .claude/skills/setup-chromatic/templates/tests/chromatic/pages.chromatic.test.ts: sha256:b127e17c0c729bea8594c8a4e2d7b8e949ed55b6b5533a078e5356048cfb5f3c
     .claude/skills/setup-chromatic/templates/tests/chromatic/viewports.ts: sha256:af1a957f8a56299b548f25037d703e5c269657612683d8fd5c3c2c9fe1f7e719
-  content_hash: sha256:59935c0dcb67abda99d43c9c321715ee6aad755269fc582b40e14d19766d8673
+  content_hash: sha256:181888d4b9d4fb57ef536f921a5fc978bcc9591fe41e370f33a3383d4a3a4685
   skill_subset:
   - setup-chromatic
 deployments:
@@ -85,7 +85,7 @@ deployments:
   owners:
   - con/skills
   active_owner: con/skills
-  content_hash: sha256:b20a2efe245a73a806972b047c4b2b045bdaf2de9560e00043383fed7ece7827
+  content_hash: sha256:9d3f6031fed5433005eeacbed08eff3c5df9c2af199ebe84b7e00d9453c03981
 - kind: project-relative
   target: claude
   value: .claude/skills/setup-chromatic/references/several-pages.md
@@ -112,7 +112,7 @@ deployments:
   owners:
   - con/skills
   active_owner: con/skills
-  content_hash: sha256:f9cf4715b9461c16baba1b49bf7375cc0d88d12538be1f224d99fe8878763158
+  content_hash: sha256:7236f5e0f2dd6ec59e5e2cf24addfb105ea0c0c01f9fffabd5b13e44f62ee621
 - kind: project-relative
   target: claude
   value: .claude/skills/setup-chromatic/templates/.github/workflows/chromatic-playwright.yml
@@ -130,7 +130,7 @@ deployments:
   owners:
   - con/skills
   active_owner: con/skills
-  content_hash: sha256:43bcb1fafb0cd424257ebdced5990b5f03793c2d6bb8a373864cd52b335d7f43
+  content_hash: sha256:7a86e0916781cac2e040d7226a66d297bd7dcf5aad8c2230901cc31f75e9f9c1
 - kind: project-relative
   target: claude
   value: .claude/skills/setup-chromatic/templates/.github/workflows/chromatic-storybook.yml
@@ -157,7 +157,7 @@ deployments:
   owners:
   - con/skills
   active_owner: con/skills
-  content_hash: sha256:94deb85738deec64d8fd9e3b10d90af45233df85703035348621dc5c4caf10fb
+  content_hash: sha256:9d793f0596cbfc8378cc47f5ee2dcfe774ed796b314f361815dba0823cca4342
 - kind: project-relative
   target: claude
   value: .claude/skills/setup-chromatic/templates/configs/pages.ts
