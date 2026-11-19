@@ -21,7 +21,7 @@ jobs:
     name: Publish to Chromatic
     # The template has no Chromatic projects, and a fork running these workflows on its own pushes
     # has no project tokens to publish with.
-    if: github.repository != 'brain-bbqs/web-app-template' && github.event.repository.fork == false && github.event.workflow_run.conclusion == 'success'
+    if: github.repository != 'brain-bbqs/bbqs-web-app-template' && github.event.repository.fork == false && github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     permissions:
       actions: read

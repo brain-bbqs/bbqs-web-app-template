@@ -631,7 +631,7 @@ What the three files rely on, so that an edit does not break it:
 - The CLI is the `chromatic` devDependency from step 1, installed from `main`'s lockfile, so it is pinned and moves only with an npm update.
 - `--exit-zero-on-changes` keeps the publish run green when there are diffs; they are reviewed in Chromatic, from its status check.
 - TurboSnap (`onlyChanged`) is not used: it needs Storybook's build stats beside the prebuilt Storybook, and usage-page does without it.
-- In the BBQS web-app template, the publish job's `if` also starts with `github.repository != 'brain-bbqs/web-app-template' &&`, since the template has no Chromatic projects; a repository generated from it can keep or drop that.
+- In the BBQS web-app template, the publish job's `if` also starts with `github.repository != 'brain-bbqs/bbqs-web-app-template' &&`, since the template has no Chromatic projects; a repository generated from it can keep or drop that.
 
 ## Step 8. Housekeeping
 
