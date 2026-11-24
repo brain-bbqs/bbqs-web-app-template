@@ -9,9 +9,8 @@ targets:
 dependencies:
   apm:
     - git: con/skills
-      ref: 71e788c662d97165881b1dbc733dcd34210d979d
-      skills:
-        - setup-chromatic
+      path: skills/setup-chromatic
+      ref: dd2d0c06d2d00ba8984044e7e3ed7e0ec3f723bc
   mcp: []
 includes: auto
 scripts: {}
